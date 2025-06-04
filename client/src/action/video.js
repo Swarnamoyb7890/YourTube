@@ -37,7 +37,7 @@ export const uploadvideo = (videodata) => async (dispatch) => {
                 const { data } = await api.uploadvideo(filedata, fileoption);
                 console.log('Upload successful:', data);
 
-                dispatch({ type: 'POST_VIDEO', data });
+                dispatch({ type: 'POST_VIDEO', payload: data });
                 dispatch(getallvideo());
                 return data;
             } catch (error) {
@@ -48,30 +48,28 @@ export const uploadvideo = (videodata) => async (dispatch) => {
                     throw new Error('File is too large. Please try a smaller video file.');
                 }
 
-                if (retryCount < maxRetries) {
-                    console.log(`Upload failed, retrying... (${retryCount}/${maxRetries})`);
-                    // Wait before retrying (exponential backoff)
+                // Check if we have a detailed error message from the server
+                const errorMessage = error.response?.data?.message || error.message;
+
+                if (errorMessage.includes('Missing required fields')) {
+                    throw new Error('Please fill in all required fields.');
+                }
+
+                if (retryCount < maxRetries && !errorMessage.includes('Only MP4')) {
+                    console.log(`Upload failed, retrying... (${retryCount}/${maxRetries}`);
                     await new Promise(resolve => setTimeout(resolve, Math.min(1000 * (2 ** retryCount), 10000)));
+                } else {
+                    throw new Error(errorMessage || 'Error uploading video. Please try again.');
                 }
             }
         }
 
-        // If we get here, all retries failed
-        console.error('All upload attempts failed:', lastError);
-        if (lastError.message.includes('Network Error')) {
-            throw new Error('Network connection is unstable. Please check your internet connection and try again.');
-        } else if (lastError.response?.status === 400) {
-            throw new Error(lastError.response.data.message || 'Invalid request. Please check file format and try again.');
-        } else if (lastError.response?.status === 401) {
-            throw new Error('Please login again to upload videos.');
-        } else {
-            throw new Error(`Upload failed after ${maxRetries} attempts. Please try again later.`);
-        }
+        throw new Error(`Upload failed after ${maxRetries} attempts. Please try again later.`);
     } catch (error) {
         console.error('Upload error:', error);
         throw error;
     }
-}
+};
 
 export const getallvideo = () => async (dispatch) => {
     try {
@@ -80,7 +78,7 @@ export const getallvideo = () => async (dispatch) => {
     } catch (error) {
         console.error('Error fetching videos:', error);
     }
-}
+};
 
 export const likevideo = (likedata) => async (dispatch) => {
     try {
