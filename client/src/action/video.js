@@ -3,12 +3,22 @@ import * as api from "../Api";
 export const uploadvideo = (videodata) => async (dispatch) => {
     try {
         const { filedata, fileoption } = videodata;
-        console.log(filedata,fileoption)
-        const { data } = await api.uploadvideo(filedata, fileoption)
-        dispatch({ type: 'POST_VIDEO', data })
-        dispatch(getallvideo())
+        // Log the FormData contents
+        for (let pair of filedata.entries()) {
+            console.log('FormData content:', pair[0], pair[1]);
+        }
+        console.log('File options:', fileoption);
+
+        const { data } = await api.uploadvideo(filedata, fileoption);
+        dispatch({ type: 'POST_VIDEO', data });
+        dispatch(getallvideo());
     } catch (error) {
-        alert(error.response.data.message)
+        console.error('Upload error details:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
+        });
+        throw new Error(error.response?.data?.message || 'Error uploading video');
     }
 }
 
@@ -33,12 +43,12 @@ export const likevideo = (likedata) => async (dispatch) => {
     }
 }
 
-export const viewvideo=(viewdata)=>async(dispatch)=>{
+export const viewvideo = (viewdata) => async (dispatch) => {
     try {
-        const{id}=viewdata;
+        const { id } = viewdata;
         console.log(id)
-        const {data}=await api.viewsvideo(id)
-        dispatch({type:"POST_VIEWS",data})
+        const { data } = await api.viewsvideo(id)
+        dispatch({ type: "POST_VIEWS", data })
         dispatch(getallvideo())
     } catch (error) {
         console.log(error)
