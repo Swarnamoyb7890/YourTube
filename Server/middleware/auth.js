@@ -32,7 +32,7 @@ const auth = (req, res, next) => {
         }
 
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECERT);
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
             console.log('Token verified:', { userId: decoded?.id });
             req.userid = decoded?.id;
             next();

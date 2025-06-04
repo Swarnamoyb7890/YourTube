@@ -63,12 +63,33 @@ const Navbar = ({ toggledrawer, seteditcreatechanelbtn }) => {
   useEffect(() => {
     const token = currentuser?.token;
     if (token) {
-      const decodedToken = jwtDecode(token); // <-- Use jwt_decode here, not jwtDecode
-      if (decodedToken.exp * 1000 < new Date().getTime()) {
+      try {
+        const decodedToken = jwtDecode(token);
+        // Check if token will expire in the next minute
+        if (decodedToken.exp * 1000 < new Date().getTime() + 60000) {
+          console.log('Token expired or about to expire, logging out...');
+          logout();
+          return;
+        }
+      } catch (error) {
+        console.error('Token decode error:', error);
         logout();
+        return;
       }
     }
-    dispatch(setcurrentuser(JSON.parse(localStorage.getItem("Profile"))));
+    // Only update currentuser from localStorage if we don't already have one
+    if (!currentuser) {
+      const storedProfile = localStorage.getItem('Profile');
+      if (storedProfile) {
+        try {
+          const parsedProfile = JSON.parse(storedProfile);
+          dispatch(setcurrentuser(parsedProfile));
+        } catch (error) {
+          console.error('Error parsing stored profile:', error);
+          localStorage.clear();
+        }
+      }
+    }
   }, [currentuser?.token, dispatch]);
 
   // Upload button handler
