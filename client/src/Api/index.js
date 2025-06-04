@@ -31,6 +31,7 @@ const API = axios.create({
     retry: 3, // Number of retries
     retryDelay: 1000, // Initial retry delay in ms
     decompress: true, // Handle compression
+    withCredentials: true, // Important for CORS
     // Disable HTTP/2 to avoid protocol errors
     transport: {
         maxRedirects: 5,
@@ -57,11 +58,12 @@ export const uploadvideo = (filedata, fileoption) => {
     // Create a new FormData with chunks if the file is large
     const newFormData = new FormData();
     for (let [key, value] of filedata.entries()) {
-        if (value instanceof File && value.size > 10 * 1024 * 1024) { // If file is larger than 10MB
-            console.log('Large file detected, using chunked upload');
-            // We'll still send the whole file, but with different headers
+        if (value instanceof File) {
+            console.log(`Appending file: ${value.name} (${value.size} bytes)`);
+            // Always append with filename to ensure proper handling
             newFormData.append(key, value, value.name);
         } else {
+            console.log(`Appending field: ${key}`);
             newFormData.append(key, value);
         }
     }
@@ -71,13 +73,14 @@ export const uploadvideo = (filedata, fileoption) => {
         headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            // Let browser set the Content-Type with boundary
+            'Authorization': API.defaults.headers.common['Authorization'],
         },
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
         timeout: 300000, // 5 minutes
         retry: 3, // Number of retries for upload
         decompress: true,
+        withCredentials: true,
         // Force HTTP/1.1
         transport: {
             forceHttp1: true
@@ -90,11 +93,18 @@ export const uploadvideo = (filedata, fileoption) => {
             if (progressEvent.loaded > 0) {
                 uploadConfig.retryCount = 0;
             }
+            console.log(`Upload progress: ${Math.round((progressEvent.loaded * 100) / progressEvent.total)}%`);
         },
         validateStatus: function (status) {
             return status >= 200 && status < 300;
         }
     };
+
+    console.log('Starting upload with config:', {
+        url: API.defaults.baseURL + '/video/uploadvideo',
+        headers: uploadConfig.headers,
+        formDataFields: Array.from(newFormData.entries()).map(([key]) => key)
+    });
 
     return API.post("/video/uploadvideo", newFormData, uploadConfig);
 };
