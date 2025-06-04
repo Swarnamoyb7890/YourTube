@@ -30,9 +30,6 @@ const API = axios.create({
     timeout: 300000, // 5 minutes
     retry: 3, // Number of retries
     retryDelay: 1000, // Initial retry delay in ms
-    // Use HTTP/1.1
-    httpAgent: new (require('http').Agent)({ keepAlive: true }),
-    httpsAgent: new (require('https').Agent)({ keepAlive: true }),
 });
 
 // Add retry interceptor
