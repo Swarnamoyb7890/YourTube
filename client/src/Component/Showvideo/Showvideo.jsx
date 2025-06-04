@@ -8,8 +8,9 @@ const Showvideo = ({ vid }) => {
     if (!filepath) return '';
     // Make sure the URL is properly formatted
     const baseUrl = 'https://yourtube-atxv.onrender.com';
-    const path = filepath.startsWith('/') ? filepath : `/${filepath}`;
-    return `${baseUrl}${path}`;
+    // Remove any leading slashes and ensure the path starts with /uploads/
+    const normalizedPath = filepath.replace(/^\/+/, '');
+    return `${baseUrl}/${normalizedPath}`;
   };
 
   return (

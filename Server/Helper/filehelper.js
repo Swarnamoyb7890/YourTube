@@ -2,11 +2,18 @@
 import multer from "multer";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-// Ensure uploads directory exists
-const uploadsDir = "uploads";
+// Get the directory name of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Ensure uploads directory exists with absolute path
+const uploadsDir = path.join(dirname(__dirname), 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log(`Created uploads directory at: ${uploadsDir}`);
 }
 
 const storage = multer.diskStorage({
@@ -14,9 +21,10 @@ const storage = multer.diskStorage({
         cb(null, uploadsDir);
     },
     filename: (req, file, cb) => {
-        cb(null,
-            new Date().toISOString().replace(/:/g, "-") + "-" + file.originalname
-        );
+        // Sanitize filename to remove special characters
+        const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + '-' + sanitizedName);
     },
 });
 

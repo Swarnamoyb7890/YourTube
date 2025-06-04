@@ -1,4 +1,5 @@
 import videofile from "../Models/videofile.js";
+import path from "path";
 
 export const uploadvideo = async (req, res) => {
     try {
@@ -8,7 +9,8 @@ export const uploadvideo = async (req, res) => {
             file: req.file ? {
                 originalname: req.file.originalname,
                 mimetype: req.file.mimetype,
-                size: req.file.size
+                size: req.file.size,
+                path: req.file.path
             } : 'No file'
         });
 
@@ -31,10 +33,14 @@ export const uploadvideo = async (req, res) => {
             });
         }
 
+        // Normalize the file path for storage
+        const normalizedPath = path.normalize(req.file.path).replace(/\\/g, '/');
+        const storagePath = `uploads/${path.basename(normalizedPath)}`;
+
         const file = new videofile({
             videotitle: req.body.title,
             filename: req.file.originalname,
-            filepath: req.file.path,
+            filepath: storagePath,
             filetype: req.file.mimetype,
             filesize: req.file.size,
             videochanel: req.body.chanel,
@@ -44,6 +50,7 @@ export const uploadvideo = async (req, res) => {
         console.log("Attempting to save file:", {
             title: file.videotitle,
             filename: file.filename,
+            filepath: file.filepath,
             size: file.filesize,
             uploader: file.uploader
         });
@@ -57,6 +64,7 @@ export const uploadvideo = async (req, res) => {
             file: {
                 title: file.videotitle,
                 filename: file.filename,
+                filepath: file.filepath,
                 size: file.filesize,
                 uploader: file.uploader
             }
