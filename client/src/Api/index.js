@@ -4,7 +4,15 @@ const API = axios.create({
     baseURL: `https://yourtube-atxv.onrender.com`,
     headers: {
         'Accept': 'application/json',
-    }
+    },
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+    // Force using HTTP/1.1 instead of HTTP/2 or HTTP/3 (QUIC)
+    transport: {
+        protocol: 'http:'
+    },
+    // Increase timeout for large files
+    timeout: 300000 // 5 minutes
 })
 
 API.interceptors.request.use((req) => {
@@ -22,7 +30,18 @@ export const login = (authdata) => API.post("/user/login", authdata);
 export const updatechaneldata = (id, updatedata) => API.patch(`/user/update/${id}`, updatedata)
 export const fetchallchannel = () => API.get("/user/getallchannel");
 
-export const uploadvideo = (filedata, fileoption) => API.post("/video/uploadvideo", filedata, fileoption)
+export const uploadvideo = (filedata, fileoption) => {
+    const uploadConfig = {
+        ...fileoption,
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        timeout: 300000 // 5 minutes
+    };
+    return API.post("/video/uploadvideo", filedata, uploadConfig);
+}
 export const getvideos = () => API.get("/video/getvideos");
 export const likevideo = (id, Like) => API.patch(`/video/like/${id}`, { Like });
 export const viewsvideo = (id) => API.patch(`/video/view/${id}`);
