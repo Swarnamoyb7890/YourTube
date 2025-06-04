@@ -9,6 +9,7 @@ const Videoupload = ({ setvideouploadpage }) => {
   const [videofile, setvideofile] = useState("");
   const [progress, setprogress] = useState(0);
   const [error, setError] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const dispatch = useDispatch();
   
   const handlesetvideofile = (e) => {
@@ -19,7 +20,11 @@ const Videoupload = ({ setvideouploadpage }) => {
         setvideofile(null);
         return;
       }
-      console.log("Selected file:", file.name, "Size:", file.size, "Type:", file.type);
+      console.log("Selected file:", {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
       setvideofile(file);
       setError(null);
     }
@@ -35,7 +40,9 @@ const Videoupload = ({ setvideouploadpage }) => {
       setprogress(percentage);
       if (percentage === 100) {
         setTimeout(() => {
-          setvideouploadpage(false);
+          if (!error) {
+            setvideouploadpage(false);
+          }
         }, 3000);
       }
     },
@@ -43,24 +50,24 @@ const Videoupload = ({ setvideouploadpage }) => {
 
   const uploadvideofile = async () => {
     try {
+      setError(null);
+      setIsUploading(true);
+
+      // Validation checks
       if (!currentuser?.result) {
-        setError("Please login to upload a video");
-        return;
+        throw new Error("Please login to upload a video");
       }
 
-      if (!title) {
-        setError("Please enter a title for the video");
-        return;
+      if (!title.trim()) {
+        throw new Error("Please enter a title for the video");
       }
 
       if (!videofile) {
-        setError("Please attach a video file");
-        return;
+        throw new Error("Please attach a video file");
       }
 
       if (videofile.size > 50 * 1024 * 1024) {
-        setError("Please attach a video file less than 50MB");
-        return;
+        throw new Error("Please attach a video file less than 50MB");
       }
 
       console.log("Starting upload with:", {
@@ -78,11 +85,15 @@ const Videoupload = ({ setvideouploadpage }) => {
       filedata.append("chanel", currentuser.result._id);
       filedata.append("uploader", currentuser.result.name);
 
-      await dispatch(uploadvideo({ filedata: filedata, fileoption: fileoption }));
+      const response = await dispatch(uploadvideo({ filedata: filedata, fileoption: fileoption }));
+      console.log('Upload completed successfully:', response);
       setError(null);
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error("Upload failed:", error);
       setError(error.message || "Error uploading video. Please try again.");
+      setprogress(0);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -97,7 +108,7 @@ const Videoupload = ({ setvideouploadpage }) => {
       />
       <div className="container2_VidUpload">
         {error && (
-          <div className="error-message" style={{ color: "red", margin: "10px 0" }}>
+          <div className="error-message" style={{ color: "red", margin: "10px 0", padding: "10px", backgroundColor: "rgba(255,0,0,0.1)" }}>
             {error}
           </div>
         )}
@@ -107,6 +118,7 @@ const Videoupload = ({ setvideouploadpage }) => {
             maxLength={30}
             placeholder="Enter title of your video"
             className="ibox_vidupload"
+            value={title}
             onChange={(e) => {
               settitle(e.target.value);
               setError(null);
@@ -123,11 +135,12 @@ const Videoupload = ({ setvideouploadpage }) => {
                 handlesetvideofile(e);
               }}
               className="ibox_vidupload"
+              disabled={isUploading}
             />
           </label>
           {videofile && (
             <div style={{ color: "white", margin: "5px 0" }}>
-              Selected file: {videofile.name}
+              Selected file: {videofile.name} ({Math.round(videofile.size / 1024 / 1024)}MB)
             </div>
           )}
         </div>
@@ -135,25 +148,28 @@ const Videoupload = ({ setvideouploadpage }) => {
           <input
             type="submit"
             onClick={uploadvideofile}
-            value={"Upload"}
+            value={isUploading ? "Uploading..." : "Upload"}
             className="ibox_vidupload btn_vidUpload"
+            disabled={isUploading}
           />
-          <div className="loader ibox_div_vidupload">
-            <CircularProgressbar
-              value={progress}
-              text={`${progress}%`}
-              styles={buildStyles({
-                rotation: 0.25,
-                strokeLinecap: "butt",
-                textSize: "20px",
-                pathTransitionDuration: 0.5,
-                pathColor: `rgba(255,255,255,${progress / 100})`,
-                textColor: "#f88",
-                trailColor: "#adff2f",
-                backgroundColor: "#3e98c7",
-              })}
-            />
-          </div>
+          {(progress > 0 || isUploading) && (
+            <div className="loader ibox_div_vidupload">
+              <CircularProgressbar
+                value={progress}
+                text={`${progress}%`}
+                styles={buildStyles({
+                  rotation: 0.25,
+                  strokeLinecap: "butt",
+                  textSize: "20px",
+                  pathTransitionDuration: 0.5,
+                  pathColor: `rgba(255,255,255,${progress / 100})`,
+                  textColor: "#f88",
+                  trailColor: "#adff2f",
+                  backgroundColor: "#3e98c7",
+                })}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
