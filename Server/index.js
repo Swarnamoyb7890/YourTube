@@ -12,6 +12,18 @@ import multer from 'multer'
 dotenv.config()
 const app = express()
 
+// Security headers middleware
+app.use((req, res, next) => {
+    // Allow same-origin and cross-origin access
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    // Additional security headers
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+});
+
 // CORS configuration
 const allowedOrigins = [
     'http://localhost:3000',
@@ -32,12 +44,24 @@ app.use(cors({
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Origin', 'X-Requested-With', 'Accept', 'x-client-key', 'x-client-token', 'x-client-secret', 'Authorization'],
+    exposedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
     credentials: true,
     optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
 }));
 
-// Pre-flight requests
-app.options('*', cors());
+// Handle preflight requests for all routes
+app.options('*', (req, res) => {
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        res.status(200).send();
+    } else {
+        res.status(403).send();
+    }
+});
 
 // Body parser configuration
 app.use(bodyParser.json({ limit: "50mb" }));

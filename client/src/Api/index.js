@@ -58,13 +58,16 @@ API.interceptors.request.use((req) => {
 export const uploadvideo = (filedata, fileoption) => {
     // Create a new FormData with chunks if the file is large
     const newFormData = new FormData();
+
+    // Log what we're about to upload
+    console.log('Preparing upload data...');
+
     for (let [key, value] of filedata.entries()) {
         if (value instanceof File) {
-            console.log(`Appending file: ${value.name} (${value.size} bytes)`);
-            // Always append with filename to ensure proper handling
+            console.log(`Adding file: ${value.name} (${value.size} bytes, type: ${value.type})`);
             newFormData.append(key, value, value.name);
         } else {
-            console.log(`Appending field: ${key}`);
+            console.log(`Adding field: ${key} = ${value}`);
             newFormData.append(key, value);
         }
     }
@@ -74,7 +77,7 @@ export const uploadvideo = (filedata, fileoption) => {
         headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            'Authorization': API.defaults.headers.common['Authorization'],
+            // Authorization will be added by the interceptor
         },
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
@@ -92,19 +95,23 @@ export const uploadvideo = (filedata, fileoption) => {
             }
             // Reset retry count on progress
             if (progressEvent.loaded > 0) {
-                uploadConfig.retryCount = 0;
+                console.log(`Upload progress: ${Math.round((progressEvent.loaded * 100) / progressEvent.total)}%`);
             }
-            console.log(`Upload progress: ${Math.round((progressEvent.loaded * 100) / progressEvent.total)}%`);
         },
         validateStatus: function (status) {
             return status >= 200 && status < 300;
         }
     };
 
-    console.log('Starting upload with config:', {
-        url: API.defaults.baseURL + '/video/uploadvideo',
+    // Log the request we're about to make
+    console.log('Making upload request with config:', {
+        url: '/video/uploadvideo',
         headers: uploadConfig.headers,
-        formDataFields: Array.from(newFormData.entries()).map(([key]) => key)
+        formDataFields: Array.from(newFormData.entries()).map(([key, value]) => ({
+            key,
+            type: value instanceof File ? 'File' : 'Field',
+            value: value instanceof File ? `${value.name} (${value.size} bytes)` : value
+        }))
     });
 
     return API.post("/video/uploadvideo", newFormData, uploadConfig);
