@@ -1,5 +1,4 @@
 import axios from "axios"
-import jwt from "jsonwebtoken"
 
 // Create axios retry interceptor
 const createAxiosRetryInterceptor = (instance, maxRetries = 3) => {
