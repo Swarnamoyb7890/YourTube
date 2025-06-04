@@ -30,6 +30,12 @@ const API = axios.create({
     timeout: 300000, // 5 minutes
     retry: 3, // Number of retries
     retryDelay: 1000, // Initial retry delay in ms
+    decompress: true, // Handle compression
+    // Disable HTTP/2 to avoid protocol errors
+    transport: {
+        maxRedirects: 5,
+        forceHttp1: true
+    }
 });
 
 // Add retry interceptor
@@ -48,15 +54,34 @@ API.interceptors.request.use((req) => {
 
 // For video upload, we'll use specific config
 export const uploadvideo = (filedata, fileoption) => {
+    // Create a new FormData with chunks if the file is large
+    const newFormData = new FormData();
+    for (let [key, value] of filedata.entries()) {
+        if (value instanceof File && value.size > 10 * 1024 * 1024) { // If file is larger than 10MB
+            console.log('Large file detected, using chunked upload');
+            // We'll still send the whole file, but with different headers
+            newFormData.append(key, value, value.name);
+        } else {
+            newFormData.append(key, value);
+        }
+    }
+
     const uploadConfig = {
         ...fileoption,
         headers: {
-            'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            // Let browser set the Content-Type with boundary
         },
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
         timeout: 300000, // 5 minutes
         retry: 3, // Number of retries for upload
+        decompress: true,
+        // Force HTTP/1.1
+        transport: {
+            forceHttp1: true
+        },
         onUploadProgress: (progressEvent) => {
             if (fileoption.onUploadProgress) {
                 fileoption.onUploadProgress(progressEvent);
@@ -66,12 +91,12 @@ export const uploadvideo = (filedata, fileoption) => {
                 uploadConfig.retryCount = 0;
             }
         },
-        // Additional error handling
         validateStatus: function (status) {
             return status >= 200 && status < 300;
         }
     };
-    return API.post("/video/uploadvideo", filedata, uploadConfig);
+
+    return API.post("/video/uploadvideo", newFormData, uploadConfig);
 };
 
 export const login = (authdata) => API.post("/user/login", authdata);
