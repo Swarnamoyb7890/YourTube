@@ -12,19 +12,26 @@ import axios from "axios";
 import { login } from "../../action/auth";
 import { useGoogleLogin, googleLogout } from "@react-oauth/google";
 import { setcurrentuser } from "../../action/currentuser";
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode";
 
 const Navbar = ({ toggledrawer, seteditcreatechanelbtn }) => {
   const [authbtn, setauthbtn] = useState(false);
   const [user, setuser] = useState(null);
-  const [profile, setprofile] = useState(null);
-  const dispatch = useDispatch();
+  const [profile, setprofile] = useState({});
+  const [shownotification, setshownotification] = useState(false);
 
+  const dispatch = useDispatch();
   const currentuser = useSelector((state) => state.currentuserreducer);
+
+  const successlogin = () => {
+    if (profile.email) {
+      dispatch(login({ email: profile.email }));
+    }
+  };
 
   const google_login = useGoogleLogin({
     onSuccess: (tokenResponse) => setuser(tokenResponse),
-    onError: (error) => console.log("Google Login Failed", error),
+    onError: (error) => console.log("Login Failed", error),
   });
 
   useEffect(() => {
@@ -41,14 +48,11 @@ const Navbar = ({ toggledrawer, seteditcreatechanelbtn }) => {
         )
         .then((res) => {
           setprofile(res.data);
-          dispatch(login({ email: res.data.email }));
-          console.log("Logging in with:", res.data.email);
+          successlogin();
         })
-        .catch((err) => {
-          console.error("Google user info fetch error", err);
-        });
+        .catch((err) => console.error(err));
     }
-  }, [user, dispatch]);
+  }, [user]);
 
   const logout = () => {
     dispatch(setcurrentuser(null));
@@ -59,21 +63,29 @@ const Navbar = ({ toggledrawer, seteditcreatechanelbtn }) => {
   useEffect(() => {
     const token = currentuser?.token;
     if (token) {
-      const decodetoken = jwtDecode(token);
-      if (decodetoken.exp * 1000 < new Date().getTime()) {
+      const decodedToken = jwtDecode(token);
+      if (decodedToken.exp * 1000 < new Date().getTime()) {
         logout();
       }
     }
+    dispatch(setcurrentuser(JSON.parse(localStorage.getItem("Profile"))));
+  }, [currentuser?.token, dispatch]);
 
-    const profile = JSON.parse(localStorage.getItem("Profile"));
-    if (profile) dispatch(setcurrentuser(profile));
-  }, [dispatch]);
+  // Upload button handler
+  const handleUploadClick = () => {
+    seteditcreatechanelbtn(true);
+  };
+
+  // Notification toggle handler
+  const handleNotificationClick = () => {
+    setshownotification(!shownotification);
+  };
 
   return (
     <>
       <div className="Container_Navbar">
         <div className="Burger_Logo_Navbar">
-          <div className="burger" onClick={toggledrawer}>
+          <div className="burger" onClick={() => toggledrawer()}>
             <p></p>
             <p></p>
             <p></p>
@@ -85,34 +97,57 @@ const Navbar = ({ toggledrawer, seteditcreatechanelbtn }) => {
         </div>
 
         <Searchbar />
-        <RiVideoAddLine size={22} className={"vid_bell_Navbar"} />
+
+        <RiVideoAddLine
+          size={22}
+          className="vid_bell_Navbar"
+          onClick={handleUploadClick}
+          title="Upload Video"
+        />
 
         <div className="apps_Box">
-          {Array(9)
-            .fill(0)
-            .map((_, idx) => (
-              <p key={idx} className="appBox"></p>
-            ))}
+          <p className="appBox"></p>
+          <p className="appBox"></p>
+          <p className="appBox"></p>
+          <p className="appBox"></p>
+          <p className="appBox"></p>
+          <p className="appBox"></p>
+          <p className="appBox"></p>
+          <p className="appBox"></p>
+          <p className="appBox"></p>
         </div>
 
-        <IoMdNotificationsOutline size={22} className={"vid_bell_Navbar"} />
+        <IoMdNotificationsOutline
+          size={22}
+          className="vid_bell_Navbar"
+          onClick={handleNotificationClick}
+          title="Notifications"
+        />
 
         <div className="Auth_cont_Navbar">
           {currentuser ? (
             <div className="Chanel_logo_App" onClick={() => setauthbtn(true)}>
               <p className="fstChar_logo_App">
-                {currentuser.result.name
+                {currentuser?.result.name
                   ? currentuser.result.name.charAt(0).toUpperCase()
-                  : currentuser.result.email.charAt(0).toUpperCase()}
+                  : currentuser?.result.email.charAt(0).toUpperCase()}
               </p>
             </div>
           ) : (
-            <p className="Auth_Btn" onClick={google_login}>
+            <p className="Auth_Btn" onClick={() => google_login()}>
               <BiUserCircle size={22} />
               <b>Sign in</b>
             </p>
           )}
         </div>
+
+        {shownotification && (
+          <div className="notification-popup">
+            <p>You uploaded a new video</p>
+            <p>Someone liked your video</p>
+            <p>You have 3 new views</p>
+          </div>
+        )}
       </div>
 
       {authbtn && (
