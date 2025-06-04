@@ -2,14 +2,24 @@ import React from "react";
 import "./Showvideo.css";
 import { Link } from "react-router-dom";
 import moment from "moment";
+
 const Showvideo = ({ vid }) => {
-  // console.log(vid)
+  const getVideoUrl = (filepath) => {
+    if (!filepath) return '';
+    // Make sure the URL is properly formatted
+    const baseUrl = 'https://yourtube-atxv.onrender.com';
+    const path = filepath.startsWith('/') ? filepath : `/${filepath}`;
+    return `${baseUrl}${path}`;
+  };
+
   return (
     <>
       <Link to={`/videopage/${vid._id}`}>
         <video
-          src={`https://yourtube-atxv.onrender.com/${vid.filepath}`}
+          src={getVideoUrl(vid.filepath)}
           className="video_ShowVideo"
+          preload="metadata"
+          crossOrigin="anonymous"
         />
       </Link>
       <div className="video_description">

@@ -8,6 +8,7 @@ import Comment from "../../Component/Comment/Comment";
 import { viewvideo } from "../../action/video";
 import { addtohistory } from "../../action/history";
 import { useSelector, useDispatch } from "react-redux";
+
 const Videopage = () => {
   const { vid } = useParams();
   const dispatch = useDispatch();
@@ -58,9 +59,19 @@ const Videopage = () => {
   const vv = vids?.data.filter((q) => q._id === vid)[0];
 
   const currentuser = useSelector((state) => state.currentuserreducer);
+
+  const getVideoUrl = (filepath) => {
+    if (!filepath) return '';
+    // Make sure the URL is properly formatted
+    const baseUrl = 'https://yourtube-atxv.onrender.com';
+    const path = filepath.startsWith('/') ? filepath : `/${filepath}`;
+    return `${baseUrl}${path}`;
+  };
+
   const handleviews = () => {
     dispatch(viewvideo({ id: vid }));
   };
+
   const handlehistory = () => {
     dispatch(
       addtohistory({
@@ -69,25 +80,33 @@ const Videopage = () => {
       })
     );
   };
+
   useEffect(() => {
     if (currentuser) {
       handlehistory();
     }
     handleviews();
   }, []);
+
+  if (!vv) {
+    return <div className="container_videoPage">Video not found</div>;
+  }
+
   return (
     <>
       <div className="container_videoPage">
         <div className="container2_videoPage">
           <div className="video_display_screen_videoPage">
             <video
-              src={`https://yourtube-atxv.onrender.com/${vv?.filepath}`}
+              src={getVideoUrl(vv.filepath)}
               className="video_ShowVideo_videoPage"
               controls
+              preload="metadata"
+              crossOrigin="anonymous"
             ></video>
             <div className="video_details_videoPage">
               <div className="video_btns_title_VideoPage_cont">
-                <p className="video_title_VideoPage">{vv?.title}</p>
+                <p className="video_title_VideoPage">{vv?.videotitle}</p>
                 <div className="views_date_btns_VideoPage">
                   <div className="views_videoPage">
                     {vv?.views} views <div className="dot"></div>{" "}

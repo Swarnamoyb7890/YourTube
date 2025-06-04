@@ -31,7 +31,8 @@ const allowedOrigins = [
     'https://your-tube-client.netlify.app'
 ];
 
-app.use(cors({
+// CORS middleware for all routes except /uploads
+app.use(/^(?!\/uploads).*/, cors({
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
@@ -46,14 +47,17 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Origin', 'X-Requested-With', 'Accept', 'x-client-key', 'x-client-token', 'x-client-secret', 'Authorization'],
     exposedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
     credentials: true,
-    optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
+    optionsSuccessStatus: 200
 }));
+
+// Special CORS configuration for /uploads - allow all origins
+app.use('/uploads', cors(), express.static(path.join('uploads')));
 
 // Handle preflight requests for all routes
 app.options('*', (req, res) => {
     const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
+    if (allowedOrigins.includes(origin) || req.path.startsWith('/uploads')) {
+        res.setHeader('Access-Control-Allow-Origin', origin || '*');
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
@@ -68,9 +72,6 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.json({ limit: "50mb", extended: true }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
-
-// Static file serving
-app.use('/uploads', express.static(path.join('uploads')));
 
 // Routes
 app.get('/', (req, res) => {
