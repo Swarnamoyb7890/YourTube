@@ -72,12 +72,20 @@ export const uploadvideo = (filedata, fileoption) => {
         }
     }
 
+    // Get the auth token
+    const token = localStorage.getItem("Profile") ? JSON.parse(localStorage.getItem("Profile")).token : null;
+
+    if (!token) {
+        console.error('No authentication token found');
+        throw new Error('Please login to upload videos');
+    }
+
     const uploadConfig = {
         ...fileoption,
         headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            // Authorization will be added by the interceptor
+            'Authorization': `Bearer ${token}`
         },
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
@@ -93,7 +101,7 @@ export const uploadvideo = (filedata, fileoption) => {
             if (fileoption.onUploadProgress) {
                 fileoption.onUploadProgress(progressEvent);
             }
-            // Reset retry count on progress
+            // Log progress
             if (progressEvent.loaded > 0) {
                 console.log(`Upload progress: ${Math.round((progressEvent.loaded * 100) / progressEvent.total)}%`);
             }
@@ -106,7 +114,10 @@ export const uploadvideo = (filedata, fileoption) => {
     // Log the request we're about to make
     console.log('Making upload request with config:', {
         url: '/video/uploadvideo',
-        headers: uploadConfig.headers,
+        headers: {
+            ...uploadConfig.headers,
+            'Authorization': 'Bearer [HIDDEN]' // Don't log the actual token
+        },
         formDataFields: Array.from(newFormData.entries()).map(([key, value]) => ({
             key,
             type: value instanceof File ? 'File' : 'Field',
