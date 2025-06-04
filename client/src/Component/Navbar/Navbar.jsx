@@ -12,7 +12,7 @@ import axios from "axios";
 import { login } from "../../action/auth";
 import { useGoogleLogin, googleLogout } from "@react-oauth/google";
 import { setcurrentuser } from "../../action/currentuser";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // <-- Import as jwt_decode
 
 const Navbar = ({ toggledrawer, seteditcreatechanelbtn }) => {
   const [authbtn, setauthbtn] = useState(false);
@@ -63,7 +63,7 @@ const Navbar = ({ toggledrawer, seteditcreatechanelbtn }) => {
   useEffect(() => {
     const token = currentuser?.token;
     if (token) {
-      const decodedToken = jwtDecode(token);
+      const decodedToken = jwtDecode(token); // <-- Use jwt_decode here, not jwtDecode
       if (decodedToken.exp * 1000 < new Date().getTime()) {
         logout();
       }
