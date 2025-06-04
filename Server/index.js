@@ -13,12 +13,31 @@ dotenv.config()
 const app = express()
 
 // CORS configuration
+const allowedOrigins = [
+    'http://localhost:3000',
+    'https://yourtubesb.netlify.app',
+    'https://your-tube-client.netlify.app'
+];
+
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://your-tube-client.netlify.app'],
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Origin', 'X-Requested-With', 'Accept', 'x-client-key', 'x-client-token', 'x-client-secret', 'Authorization'],
-    credentials: true
+    credentials: true,
+    optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
 }));
+
+// Pre-flight requests
+app.options('*', cors());
 
 // Body parser configuration
 app.use(bodyParser.json({ limit: "50mb" }));

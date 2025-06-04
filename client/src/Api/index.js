@@ -24,6 +24,7 @@ const API = axios.create({
     baseURL: `https://yourtube-atxv.onrender.com`,
     headers: {
         'Accept': 'application/json',
+        'Content-Type': 'application/json'
     },
     maxContentLength: Infinity,
     maxBodyLength: Infinity,
