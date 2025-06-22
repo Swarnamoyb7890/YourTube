@@ -6,5 +6,10 @@ export const getVideoUrl = (filepath) => {
 
     // Remove any leading slashes and ensure the path starts with /uploads/
     const normalizedPath = filepath.replace(/^\/+/, '');
-    return `${baseUrl}/${normalizedPath}`;
+    const fullUrl = `${baseUrl}/${normalizedPath}`;
+
+    // Debug logging
+    console.log('Video URL generated:', { filepath, normalizedPath, fullUrl });
+
+    return fullUrl;
 }; 

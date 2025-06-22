@@ -8,6 +8,7 @@ import Comment from "../../Component/Comment/Comment";
 import { viewvideo } from "../../action/video";
 import { addtohistory } from "../../action/history";
 import { useSelector, useDispatch } from "react-redux";
+import { getVideoUrl } from "../../utils/videoUtils";
 
 const Videopage = () => {
   const { vid } = useParams();
@@ -59,17 +60,6 @@ const Videopage = () => {
   const vv = vids?.data.filter((q) => q._id === vid)[0];
 
   const currentuser = useSelector((state) => state.currentuserreducer);
-
-  const getVideoUrl = (filepath) => {
-    if (!filepath) return '';
-    // Use local server URL when running locally
-    const baseUrl = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:5000'
-      : 'https://yourtube-atxv.onrender.com';
-    // Remove any leading slashes and ensure the path starts with /uploads/
-    const normalizedPath = filepath.replace(/^\/+/, '');
-    return `${baseUrl}/${normalizedPath}`;
-  };
 
   const handleviews = useCallback(() => {
     dispatch(viewvideo({ id: vid }));
