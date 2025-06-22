@@ -1,13 +1,22 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Describechannel from './Describechannel'
 import Leftsidebar from '../../Component/Leftsidebar/Leftsidebar'
 import Showvideogrid from '../../Component/Showvideogrid/Showvideogrid'
 import vid from "../../Component/Video/vid.mp4";
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { getallvideo } from '../../action/video';
+import { fetchallchannel } from '../../action/channeluser';
 
 const Channel = ({seteditcreatechanelbtn,setvideouploadpage}) => {
   const {cid} = useParams();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getallvideo());
+    dispatch(fetchallchannel());
+  }, [dispatch]);
+
   const vids = useSelector(state => state.videoreducer)?.data?.filter(q => q?.videochanel === cid).reverse();
   const currentuser = useSelector(state => state.currentuserreducer);
 

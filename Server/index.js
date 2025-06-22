@@ -27,7 +27,15 @@ app.use((req, res, next) => {
     next();
 });
 
-// CORS configuration
+// Correctly serve static video files
+app.use('/uploads', (req, res, next) => {
+    res.setHeader('Accept-Ranges', 'bytes');
+    cors()(req, res, next);
+}, (req, res, next) => {
+    express.static(uploadsDir)(req, res, next);
+});
+
+// CORS configuration for API routes
 const allowedOrigins = [
     'https://yourtubesb.netlify.app',
     'https://your-tube-client.netlify.app'
@@ -52,12 +60,6 @@ app.use(/^(?!\/uploads).*/, cors({
     optionsSuccessStatus: 200
 }));
 
-// Special CORS configuration for /uploads - allow all origins
-app.use('/uploads', cors(), (req, res, next) => {
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    next();
-}, express.static(uploadsDir));
-
 // Handle preflight requests for all routes
 app.options('*', (req, res) => {
     const origin = req.headers.origin;
@@ -77,9 +79,6 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.json({ limit: "50mb", extended: true }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
-
-// Serve static files from the 'uploads' directory
-app.use('/uploads', express.static('uploads'));
 
 // Routes
 app.get('/', (req, res) => {
