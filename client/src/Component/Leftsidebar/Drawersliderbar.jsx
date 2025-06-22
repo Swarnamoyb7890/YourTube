@@ -1,13 +1,21 @@
 import React from 'react'
 import "./Leftsidebar.css"
-import { AiFillPlaySquare, AiOutlineHome, AiFillLike } from 'react-icons/ai'
-import { MdOutlineExplore, MdOutlineVideoLibrary, MdSubscriptions, MdOutlineWatchLater } from "react-icons/md"
+import "./Drawersliderbar.css"
+import { AiFillPlaySquare, AiOutlineHome, AiFillLike, AiOutlinePlus } from 'react-icons/ai'
+import { MdOutlineExplore, MdOutlineVideoLibrary, MdSubscriptions, MdOutlineWatchLater, MdGroups } from "react-icons/md"
 import { FaHistory } from 'react-icons/fa'
 import shorts from "./shorts.png"
 import { NavLink } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { IoPeopleOutline } from "react-icons/io5"
 
 const Drawersliderbar = ({ toggledraw, toggledrawersidebar }) => {
+  const groups = useSelector(state => state.groups.data);
+  const currentUser = useSelector(state => state.currentuserreducer);
+
+  // Filter groups where the current user is a member
+  const userGroups = groups?.filter(group => group.members.includes(currentUser?.result?._id));
+
   return (
     <div className="container_DrawaerLeftSidebar" style={toggledrawersidebar}>
       <div className="container2_DrawaerLeftSidebar">
@@ -74,12 +82,27 @@ const Drawersliderbar = ({ toggledraw, toggledrawersidebar }) => {
             </div>
           </NavLink>
           <div className="section_divider"></div>
-          <NavLink to={'/group/create'} className="icon_sidebar_div">
-            <div className="icon_wrapper">
-              <IoPeopleOutline size={22} className='icon_sidebar' style={{ margin: "auto 0.7rem" }} />
-              <div className="text_sidebar_icon">Group Chat</div>
-            </div>
-          </NavLink>
+          <div className="groups_sidebar_section">
+            <h3 className="groups_sidebar_title">Groups</h3>
+            {currentUser && (
+              <>
+                <NavLink to={'/group/create'} className="icon_sidebar_div create_group_btn">
+                  <div className="icon_wrapper">
+                    <AiOutlinePlus size={22} className='icon_sidebar' style={{ margin: "auto 0.7rem" }} />
+                    <div className="text_sidebar_icon">Create Group</div>
+                  </div>
+                </NavLink>
+                {userGroups && userGroups.map(group => (
+                  <NavLink key={group._id} to={`/group/${group._id}`} className="icon_sidebar_div group_link">
+                    <div className="icon_wrapper">
+                      <MdGroups size={22} className='icon_sidebar' style={{ margin: "auto 0.7rem" }} />
+                      <div className="text_sidebar_icon">{group.name}</div>
+                    </div>
+                  </NavLink>
+                ))}
+              </>
+            )}
+          </div>
         </div>
         <div className="subScriptions_lsdbar">
           <h3>Your Subscription</h3>

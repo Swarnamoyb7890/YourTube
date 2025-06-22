@@ -14,7 +14,7 @@ import { getallcomment } from './action/comment';
 import { getallhistory } from './action/history';
 import { getalllikedvideo } from './action/likedvideo';
 import { getallwatchlater } from './action/watchlater';
-import { loadGroups } from './action/groups';
+import { getGroups } from './action/groups';
 
 function App() {
   const [toggledrawersidebar, settogledrawersidebar] = useState({
@@ -27,9 +27,10 @@ function App() {
     dispatch(getallvideo())
     dispatch(getallcomment())
     dispatch(getallhistory())
+    dispatch(getGroups())
     dispatch(getalllikedvideo())
     dispatch(getallwatchlater())
-    dispatch(loadGroups())
+    dispatch(getGroups())
   }, [dispatch])
 
   const toggledrawer = () => {

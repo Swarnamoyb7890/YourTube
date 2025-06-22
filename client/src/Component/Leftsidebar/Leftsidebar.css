@@ -20,11 +20,9 @@
 }
 
 .text_sidebar_icon {
-  text-align: center;
-  font-weight: 300;
-  font-size: 0.85rem;
-  padding: 0.2rem;
-
+  font-weight: 500;
+  font-size: 14px;
+  margin: auto 1rem;
 }
 
 .icon_sidebar_div:hover,
@@ -105,4 +103,8 @@
 
 .icon_wrapper .icon_sidebar {
   margin: auto 0.7rem;
+}
+
+.Subscription_lsdbar {
+  color: white;
 }

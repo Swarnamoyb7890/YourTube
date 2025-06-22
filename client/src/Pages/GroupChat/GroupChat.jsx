@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateGroupData } from '../../action/groups';
+import { updateGroupData, getGroups } from '../../action/groups';
 import { FaUsers, FaPaperPlane, FaEllipsisV, FaEdit, FaTrash, FaCheck, FaTimes, FaArrowDown, FaCircle } from 'react-icons/fa';
 import './Styles/variables.css';
 import './Styles/chat.css';
@@ -10,6 +10,9 @@ import './Styles/sidebar.css';
 import './Styles/user.css';
 
 const UserAvatar = ({ user }) => {
+    if (!user || !user.name) {
+        return null; // Don't render anything if the user data isn't loaded yet
+    }
     return (
         <div className="user-avatar">
             <div className="avatar-initial">
@@ -149,6 +152,10 @@ const GroupChat = () => {
     const messagesContainerRef = useRef(null);
     const [groupInfo, setGroupInfo] = useState(null);
 
+    useEffect(() => {
+        dispatch(getGroups());
+    }, [dispatch]);
+
     // Get random emoji for group icon
     const getGroupEmoji = () => {
         const emojis = ['🚀', '💬', '🎯', '🎮', '💡', '🎨', '🎵', '📚', '🌟', '🎪'];
@@ -169,38 +176,41 @@ const GroupChat = () => {
         };
 
         const loadGroup = () => {
-            setTimeout(() => {
-                try {
-                    let group;
-                    if (inviteLink) {
-                        group = groups.find(g => g.inviteLink === inviteLink);
-                        if (group) {
-                            if (!group.members.find(m => m._id === currentUser.result._id)) {
-                                const updatedGroup = {
-                                    ...group,
-                                    members: [...group.members, currentUser.result]
-                                };
-                                dispatch(updateGroupData(updatedGroup));
-                                group = updatedGroup;
-                            }
-                            navigate(`/group/${group._id}`);
+            if (!groups) {
+                // Data is not loaded yet, wait for the next render
+                return;
+            }
+            try {
+                let group;
+                if (inviteLink) {
+                    group = groups.find(g => g.inviteLink === inviteLink);
+                    if (group) {
+                        if (!group.members.find(m => m._id === currentUser.result._id)) {
+                            const updatedGroup = {
+                                ...group,
+                                members: [...group.members, currentUser.result]
+                            };
+                            dispatch(updateGroupData(updatedGroup));
+                            group = updatedGroup;
                         }
-                    } else {
-                        group = groups.find(g => g._id === groupId);
+                        navigate(`/group/${group._id}`);
                     }
-
-                    if (!group) {
-                        throw new Error('Group not found');
-                    }
-
-                    setGroupInfo(group);
-                    loadMessages();
-                } catch (error) {
-                    setError('Failed to load group');
-                } finally {
-                    setLoading(false);
+                } else {
+                    group = groups.find(g => g._id === groupId);
                 }
-            }, 1000);
+
+                if (!group) {
+                    throw new Error('Group not found');
+                }
+
+                setGroupInfo(group);
+                // In a real app, you would fetch messages for the group here
+                // loadMessages(); 
+            } catch (error) {
+                setError('Failed to load group');
+            } finally {
+                setLoading(false);
+            }
         };
 
         loadGroup();
