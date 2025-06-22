@@ -151,3 +151,11 @@ export const deletelikedvideo = (videoid, viewer) => API.delete(`/video/deleteli
 export const addtowatchlater = (watchlaterdata) => API.post('/video/watchlater', watchlaterdata);
 export const getallwatchlater = () => API.get('/video/getallwatchlater');
 export const deletewatchlater = (videoid, viewer) => API.delete(`/video/deletewatchlater/${videoid}/${viewer}`);
+
+export const deleteVideo = (id) => API.delete(`/video/${id}`);
+
+// Group Actions
+export const createGroup = (groupData) => API.post('/groups', groupData);
+export const getGroups = () => API.get('/groups');
+export const updateGroup = (id, groupData) => API.patch(`/groups/${id}`, groupData);
+export const deleteGroup = (id) => API.delete(`/groups/${id}`);

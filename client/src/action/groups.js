@@ -1,3 +1,5 @@
+import * as api from '../Api';
+
 // Action creators for group management
 export const setGroups = (groups) => ({
     type: 'SET_GROUPS',
@@ -14,32 +16,30 @@ export const updateGroup = (group) => ({
     payload: group
 });
 
-// Thunk action to load groups from localStorage
-export const loadGroups = () => (dispatch) => {
+// Thunk action to fetch all groups from the server
+export const getGroups = () => async (dispatch) => {
     try {
-        const groups = JSON.parse(localStorage.getItem('mockGroups') || '[]');
-        dispatch(setGroups(groups));
+        const { data } = await api.getGroups();
+        dispatch({ type: 'FETCH_GROUPS', payload: data });
     } catch (error) {
-        console.error('Error loading groups:', error);
-        dispatch(setGroups([]));
+        console.error('Error fetching groups:', error);
     }
 };
 
-// Thunk action to create a new group
-export const createGroup = (groupData) => (dispatch, getState) => {
+// Thunk action to create a new group on the server
+export const createGroup = (groupData) => async (dispatch) => {
     try {
-        const groups = getState().groups.data;
-        const newGroups = [...groups, groupData];
-        localStorage.setItem('mockGroups', JSON.stringify(newGroups));
-        dispatch(addGroup(groupData));
-        return groupData;
+        const { data } = await api.createGroup(groupData);
+        dispatch({ type: 'ADD_GROUP', payload: data });
+        dispatch(getGroups()); // Re-fetch all groups to update the state
+        return data;
     } catch (error) {
         console.error('Error creating group:', error);
         throw error;
     }
 };
 
-// Thunk action to update a group
+// Thunk action to update a group on the server
 export const updateGroupData = (groupData) => (dispatch, getState) => {
     try {
         const groups = getState().groups.data.map(group =>
@@ -50,6 +50,18 @@ export const updateGroupData = (groupData) => (dispatch, getState) => {
         return groupData;
     } catch (error) {
         console.error('Error updating group:', error);
+        throw error;
+    }
+};
+
+// Thunk action to delete a group from the server
+export const deleteGroup = (id) => async (dispatch) => {
+    try {
+        await api.deleteGroup(id);
+        dispatch({ type: 'DELETE_GROUP', payload: id });
+        dispatch(getGroups()); // Re-fetch all groups to update the state
+    } catch (error) {
+        console.error('Error deleting group:', error);
         throw error;
     }
 }; 

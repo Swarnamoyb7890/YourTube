@@ -16,38 +16,33 @@ const CreateGroup = () => {
 
     const handleCreateGroup = async (e) => {
         e.preventDefault();
+        if (!groupName.trim() || !currentUser?.result) return;
+
         setLoading(true);
         setError('');
-        
-        // Simulate API delay
-        setTimeout(async () => {
-            try {
-                // Generate a random group ID
-                const groupId = Math.random().toString(36).substring(7);
-                const mockGroup = {
-                    _id: groupId,
-                    name: groupName,
-                    creator: currentUser?.result?._id,
-                    members: [currentUser?.result],
-                    inviteLink: Math.random().toString(36).substring(7)
-                };
 
-                // Store group using Redux action
-                await dispatch(createGroup(mockGroup));
-                
-                setInviteLink(`${window.location.origin}/group/join/${mockGroup.inviteLink}`);
-                
-                // Navigate to the group chat after 2 seconds
-                setTimeout(() => {
-                    navigate(`/group/${groupId}`);
-                }, 2000);
+        const groupData = {
+            name: groupName,
+            members: [currentUser.result._id] // Send member IDs
+        };
 
-            } catch (error) {
-                setError('Failed to create group');
-            } finally {
-                setLoading(false);
+        try {
+            const newGroup = await dispatch(createGroup(groupData));
+            if (newGroup && newGroup._id) {
+                // In a real app, the backend would generate and return the invite link
+                const generatedInviteLink = `${window.location.origin}/group/join/${newGroup._id}`;
+                setInviteLink(generatedInviteLink);
+                
+                // Navigate to the group chat
+                navigate(`/group/${newGroup._id}`);
+            } else {
+                setError('Failed to create group. Please try again.');
             }
-        }, 1000);
+        } catch (err) {
+            setError(err.message || 'Failed to create group');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const copyInviteLink = () => {
