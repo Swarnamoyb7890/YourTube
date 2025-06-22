@@ -27,13 +27,12 @@ export const uploadvideo = (videodata) => async (dispatch) => {
         }
 
         // Attempt upload with retry logic
-        let retryCount = 0;
         const maxRetries = 3;
-        let lastError = null;
+        let currentAttempt = 0;
 
-        while (retryCount < maxRetries) {
+        const attemptUpload = async () => {
             try {
-                console.log(`Upload attempt ${retryCount + 1}/${maxRetries}`);
+                console.log(`Upload attempt ${currentAttempt + 1}/${maxRetries}`);
                 const { data } = await api.uploadvideo(filedata, fileoption);
                 console.log('Upload successful:', data);
 
@@ -41,30 +40,29 @@ export const uploadvideo = (videodata) => async (dispatch) => {
                 dispatch(getallvideo());
                 return data;
             } catch (error) {
-                lastError = error;
-                retryCount++;
-
+                // Check for specific error conditions that should not be retried
                 if (error.response?.status === 413) {
                     throw new Error('File is too large. Please try a smaller video file.');
                 }
 
-                // Check if we have a detailed error message from the server
                 const errorMessage = error.response?.data?.message || error.message;
 
                 if (errorMessage.includes('Missing required fields')) {
                     throw new Error('Please fill in all required fields.');
                 }
 
-                if (retryCount < maxRetries && !errorMessage.includes('Only MP4')) {
-                    console.log(`Upload failed, retrying... (${retryCount}/${maxRetries}`);
-                    await new Promise(resolve => setTimeout(resolve, Math.min(1000 * (2 ** retryCount), 10000)));
-                } else {
-                    throw new Error(errorMessage || 'Error uploading video. Please try again.');
+                if (currentAttempt < maxRetries - 1 && !errorMessage.includes('Only MP4')) {
+                    currentAttempt++;
+                    console.log(`Upload failed, retrying... (${currentAttempt}/${maxRetries})`);
+                    await new Promise(resolve => setTimeout(resolve, Math.min(1000 * (2 ** currentAttempt), 10000)));
+                    return attemptUpload();
                 }
-            }
-        }
 
-        throw new Error(`Upload failed after ${maxRetries} attempts. Please try again later.`);
+                throw new Error(errorMessage || 'Error uploading video. Please try again.');
+            }
+        };
+
+        return await attemptUpload();
     } catch (error) {
         console.error('Upload error:', error);
         throw error;

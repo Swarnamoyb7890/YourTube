@@ -1,5 +1,6 @@
 import videofile from "../Models/videofile.js";
 import path from "path";
+import { uploadsDir } from "../Helper/filehelper.js";
 
 export const uploadvideo = async (req, res) => {
     try {
@@ -33,9 +34,10 @@ export const uploadvideo = async (req, res) => {
             });
         }
 
-        // Normalize the file path for storage
-        const normalizedPath = path.normalize(req.file.path).replace(/\\/g, '/');
-        const storagePath = `uploads/${path.basename(normalizedPath)}`;
+        // Get just the filename from the full path
+        const filename = path.basename(req.file.path);
+        // Store only the relative path in the database
+        const storagePath = `uploads/${filename}`;
 
         const file = new videofile({
             videotitle: req.body.title,
@@ -52,7 +54,8 @@ export const uploadvideo = async (req, res) => {
             filename: file.filename,
             filepath: file.filepath,
             size: file.filesize,
-            uploader: file.uploader
+            uploader: file.uploader,
+            physicalPath: req.file.path
         });
 
         await file.save();

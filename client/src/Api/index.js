@@ -20,8 +20,10 @@ const createAxiosRetryInterceptor = (instance, maxRetries = 3) => {
     });
 };
 
-const API = axios.create({
-    baseURL: `https://yourtube-atxv.onrender.com`,
+export const API = axios.create({
+    baseURL: process.env.NODE_ENV === 'development'
+        ? 'http://localhost:5000'
+        : 'https://yourtube-atxv.onrender.com',
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'

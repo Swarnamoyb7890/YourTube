@@ -9,6 +9,9 @@ import Likedvideo from './Pages/Likedvideo/Likedvideo'
 import Watchhistory from './Pages/Watchhistory/Watchhistory'
 import Watchlater from './Pages/Watchlater/Watchlater'
 import Yourvideo from './Pages/Yourvideo/Yourvideo'
+import CreateGroup from './Pages/GroupChat/CreateGroup'
+import GroupChat from './Pages/GroupChat/GroupChat'
+
 const Allroutes = ({seteditcreatechanelbtn,setvideouploadpage}) => {
   return (
     <Routes>
@@ -21,6 +24,9 @@ const Allroutes = ({seteditcreatechanelbtn,setvideouploadpage}) => {
         <Route path='/Watchlater' element={<Watchlater/>}/>
         <Route path='/Yourvideo' element={<Yourvideo/>}/>
         <Route path='/channel/:cid' element={<Channel seteditcreatechanelbtn={seteditcreatechanelbtn} setvideouploadpage={setvideouploadpage}/>}/>
+        <Route path='/group/create' element={<CreateGroup/>}/>
+        <Route path='/group/:groupId' element={<GroupChat/>}/>
+        <Route path='/group/join/:inviteLink' element={<GroupChat/>}/>
     </Routes>
   )
 }

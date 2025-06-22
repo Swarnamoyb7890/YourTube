@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import "./Videopage.css";
 import moment from "moment";
 import Likewatchlatersavebtns from "./Likewatchlatersavebtns";
@@ -62,31 +62,36 @@ const Videopage = () => {
 
   const getVideoUrl = (filepath) => {
     if (!filepath) return '';
-    // Make sure the URL is properly formatted
-    const baseUrl = 'https://yourtube-atxv.onrender.com';
-    const path = filepath.startsWith('/') ? filepath : `/${filepath}`;
-    return `${baseUrl}${path}`;
+    // Use local server URL when running locally
+    const baseUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:5000'
+      : 'https://yourtube-atxv.onrender.com';
+    // Remove any leading slashes and ensure the path starts with /uploads/
+    const normalizedPath = filepath.replace(/^\/+/, '');
+    return `${baseUrl}/${normalizedPath}`;
   };
 
-  const handleviews = () => {
+  const handleviews = useCallback(() => {
     dispatch(viewvideo({ id: vid }));
-  };
+  }, [dispatch, vid]);
 
-  const handlehistory = () => {
-    dispatch(
-      addtohistory({
-        videoid: vid,
-        viewer: currentuser?.result._id,
-      })
-    );
-  };
+  const handlehistory = useCallback(() => {
+    if (currentuser?.result?._id) {
+      dispatch(
+        addtohistory({
+          videoid: vid,
+          viewer: currentuser.result._id,
+        })
+      );
+    }
+  }, [dispatch, vid, currentuser?.result?._id]);
 
   useEffect(() => {
     if (currentuser) {
       handlehistory();
     }
     handleviews();
-  }, []);
+  }, [currentuser, handlehistory, handleviews]);
 
   if (!vv) {
     return <div className="container_videoPage">Video not found</div>;

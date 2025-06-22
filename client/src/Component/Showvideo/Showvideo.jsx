@@ -1,17 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import "./Showvideo.css";
 import { Link } from "react-router-dom";
 import moment from "moment";
-import { useSelector } from "react-redux";
+import { getVideoUrl } from "../../utils/videoUtils";
 
 const Showvideo = ({ vid }) => {
-  const getVideoUrl = (filepath) => {
-    if (!filepath) return '';
-    // Make sure the URL is properly formatted
-    const baseUrl = 'https://yourtube-atxv.onrender.com';
-    // Remove any leading slashes and ensure the path starts with /uploads/
-    const normalizedPath = filepath.replace(/^\/+/, '');
-    return `${baseUrl}/${normalizedPath}`;
+  const [videoError, setVideoError] = useState(false);
+
+  const handleVideoError = (e) => {
+    console.error("Video loading error:", e);
+    setVideoError(true);
   };
 
   return (
@@ -22,7 +20,13 @@ const Showvideo = ({ vid }) => {
           className="video_ShowVideo"
           preload="metadata"
           crossOrigin="anonymous"
+          onError={handleVideoError}
         />
+        {videoError && (
+          <div className="video-error-overlay">
+            Unable to load video
+          </div>
+        )}
       </Link>
       <div className="video_description">
         <div className="Chanel_logo_App">

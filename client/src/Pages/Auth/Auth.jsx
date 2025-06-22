@@ -18,7 +18,7 @@ const Auth = ({ user, setauthbtn, seteditcreatechanelbtn }) => {
     return (
         <div className="Auth_container" onClick={() => setauthbtn(false)}>
             <div className="Auth_container2">
-                <p className="User_Details">
+                <div className="User_Details">
                     <div className="Chanel_logo_App">
                         <p className="fstChar_logo_App">
                             {user?.result.name ? (
@@ -30,7 +30,7 @@ const Auth = ({ user, setauthbtn, seteditcreatechanelbtn }) => {
                         </p>
                     </div>
                     <div className="email_auth">{user?.result.email}</div>
-                </p>
+                </div>
                 <div className="btns_Auth">
                     {user?.result.name ?(
                         <>

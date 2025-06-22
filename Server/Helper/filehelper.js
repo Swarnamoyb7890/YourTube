@@ -9,8 +9,10 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Use environment variable for uploads directory or default to a persistent path
+const uploadsDir = process.env.UPLOADS_DIR || path.join(process.env.HOME || '/tmp', 'yourtube-uploads');
+
 // Ensure uploads directory exists with absolute path
-const uploadsDir = path.join(dirname(__dirname), 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
     console.log(`Created uploads directory at: ${uploadsDir}`);
@@ -44,4 +46,5 @@ const upload = multer({
     }
 });
 
-export default upload;
+// Export both the upload middleware and the uploads directory path
+export { upload as default, uploadsDir };

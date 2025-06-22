@@ -8,6 +8,9 @@ import userroutes from "./Routes/User.js"
 import path from 'path'
 import commentroutes from './Routes/comment.js'
 import multer from 'multer'
+import { uploadsDir } from './Helper/filehelper.js'
+import groupRoutes from './Routes/groups.js'
+import messageRoutes from './Routes/messages.js'
 
 dotenv.config()
 const app = express()
@@ -51,7 +54,10 @@ app.use(/^(?!\/uploads).*/, cors({
 }));
 
 // Special CORS configuration for /uploads - allow all origins
-app.use('/uploads', cors(), express.static(path.join('uploads')));
+app.use('/uploads', cors(), (req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+}, express.static(uploadsDir));
 
 // Handle preflight requests for all routes
 app.options('*', (req, res) => {
@@ -81,6 +87,8 @@ app.get('/', (req, res) => {
 app.use('/user', userroutes);
 app.use('/video', videoroutes);
 app.use('/comment', commentroutes);
+app.use('/groups', groupRoutes);
+app.use('/messages', messageRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -125,6 +133,7 @@ const start = async () => {
         const DB_URI = process.env.DB_URI;
         await mongoose.connect(DB_URI);
         console.log("MongoDB Database connected");
+        console.log(`Using uploads directory: ${uploadsDir}`);
 
         app.listen(PORT, () => {
             console.log(`Server running on Port ${PORT}`);

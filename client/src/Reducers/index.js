@@ -1,4 +1,4 @@
-import {combineReducers} from "redux";
+import { combineReducers } from "redux";
 import authreducer from "./auth";
 import currentuserreducer from "./currentuser";
 import chanelreducer from "./chanel";
@@ -7,6 +7,8 @@ import commentreducer from "./comment";
 import historyreducer from "./history";
 import likedvideoreducer from "./likedvideo";
 import watchlaterreducer from "./watchlater";
+import groupsReducer from "./groups";
+
 export default combineReducers({
     authreducer,
     currentuserreducer,
@@ -15,5 +17,6 @@ export default combineReducers({
     commentreducer,
     historyreducer,
     likedvideoreducer,
-    watchlaterreducer
+    watchlaterreducer,
+    groups: groupsReducer
 });

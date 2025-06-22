@@ -1,0 +1,6 @@
+.section_divider {
+    height: 1px;
+    background-color: #333;
+    margin: 1rem 0;
+    opacity: 0.5;
+}
