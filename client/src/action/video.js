@@ -36,7 +36,7 @@ export const uploadvideo = (videodata) => async (dispatch) => {
                 const { data } = await api.uploadvideo(filedata, fileoption);
                 console.log('Upload successful:', data);
 
-                dispatch({ type: 'POST_VIDEO', payload: data });
+                // dispatch({ type: 'POST_VIDEO', payload: data });
                 dispatch(getallvideo());
                 return data;
             } catch (error) {

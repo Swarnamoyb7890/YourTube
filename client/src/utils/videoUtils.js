@@ -12,4 +12,10 @@ export const getVideoUrl = (filepath) => {
     console.log('Video URL generated:', { filepath, normalizedPath, fullUrl });
 
     return fullUrl;
+};
+
+// Test function to verify video player works
+export const getTestVideoUrl = () => {
+    // Use a sample video that should work
+    return 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4';
 }; 
