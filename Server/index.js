@@ -78,6 +78,9 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.json({ limit: "50mb", extended: true }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+// Serve static files from the 'uploads' directory
+app.use('/uploads', express.static('uploads'));
+
 // Routes
 app.get('/', (req, res) => {
     res.send("Your tube is working");

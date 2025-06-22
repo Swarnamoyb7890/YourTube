@@ -9,8 +9,8 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Use environment variable for uploads directory or default to a persistent path
-const uploadsDir = process.env.UPLOADS_DIR || path.join(process.env.HOME || '/tmp', 'yourtube-uploads');
+// Define the uploads directory relative to the current file
+const uploadsDir = path.join(__dirname, '..', 'uploads');
 
 // Ensure uploads directory exists with absolute path
 if (!fs.existsSync(uploadsDir)) {
