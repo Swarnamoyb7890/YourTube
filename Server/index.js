@@ -29,7 +29,6 @@ app.use((req, res, next) => {
 
 // CORS configuration
 const allowedOrigins = [
-    'http://localhost:3000',
     'https://yourtubesb.netlify.app',
     'https://your-tube-client.netlify.app'
 ];
