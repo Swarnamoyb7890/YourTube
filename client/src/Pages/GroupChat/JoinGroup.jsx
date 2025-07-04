@@ -25,7 +25,11 @@ const JoinGroup = () => {
             setGroup(response.data);
         } catch (error) {
             console.error('Error fetching group details:', error);
-            setError('Group not found or you do not have permission to view it.');
+            if (error.response?.status === 404) {
+                setError('Group not found. The invite link may be invalid or the group may have been deleted.');
+            } else {
+                setError('Failed to load group details. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -48,12 +52,24 @@ const JoinGroup = () => {
             });
 
             setSuccess('Successfully joined the group!');
+            
+            // Wait a bit longer to ensure the backend has processed the join
             setTimeout(() => {
-                navigate('/groupchat');
-            }, 2000);
+                // Refresh the page to ensure we get the latest group data
+                window.location.href = `/group/${groupId}`;
+            }, 3000);
         } catch (error) {
             console.error('Error joining group:', error);
-            const errorMessage = error.response?.data?.message || 'Failed to join group. Please try again.';
+            let errorMessage = 'Failed to join group. Please try again.';
+            
+            if (error.response?.status === 400) {
+                errorMessage = error.response.data.message || 'You are already a member of this group.';
+            } else if (error.response?.status === 404) {
+                errorMessage = 'Group not found. The invite link may be invalid.';
+            } else if (error.response?.status === 500) {
+                errorMessage = 'Server error. Please try again in a few moments.';
+            }
+            
             setError(errorMessage);
         } finally {
             setJoining(false);

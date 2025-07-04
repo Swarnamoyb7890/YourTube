@@ -137,9 +137,19 @@ export const joinGroup = async (req, res) => {
 export const getGroupById = async (req, res) => {
     try {
         const { groupId } = req.params;
+        console.log('Fetching group by ID:', groupId);
+
+        // Validate groupId is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(groupId)) {
+            console.log('Invalid groupId format:', groupId);
+            return res.status(400).json({ message: 'Invalid group ID format' });
+        }
+
         const group = await Group.findById(groupId).populate('members');
+        console.log('Group found:', group ? { id: group._id, name: group.name, membersCount: group.members?.length } : 'null');
 
         if (!group) {
+            console.log('Group not found for ID:', groupId);
             return res.status(404).json({ message: 'Group not found' });
         }
 

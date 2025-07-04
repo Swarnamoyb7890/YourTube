@@ -161,6 +161,21 @@ const GroupChat = () => {
         dispatch(getGroups());
     }, [dispatch]);
 
+    // Refresh group data when groupId changes
+    useEffect(() => {
+        if (groupId && currentUser?.result) {
+            const refreshGroupData = async () => {
+                try {
+                    const response = await API.get(`/groups/${groupId}`);
+                    setGroupInfo(response.data);
+                } catch (error) {
+                    console.error('Error refreshing group data:', error);
+                }
+            };
+            refreshGroupData();
+        }
+    }, [groupId, currentUser]);
+
     useEffect(() => {
         if (groupId) {
             dispatch(fetchMessages(groupId));
@@ -173,28 +188,16 @@ const GroupChat = () => {
             return;
         }
 
-        const loadGroup = () => {
-            if (!groups) {
-                // Data is not loaded yet, wait for the next render
-                return;
-            }
+        const loadGroup = async () => {
             try {
-                let group;
-                if (inviteLink) {
-                    group = groups.find(g => g.inviteLink === inviteLink);
-                    if (group) {
-                        if (!group.members.find(m => m._id === currentUser?.result?._id)) {
-                            const updatedGroup = {
-                                ...group,
-                                members: [...group.members, currentUser.result]
-                            };
-                            dispatch(updateGroupData(updatedGroup));
-                            group = updatedGroup;
-                        }
-                        navigate(`/group/${group._id}`);
-                    }
-                } else {
-                    group = groups.find(g => g._id === groupId);
+                // First try to get group from Redux store
+                let group = groups?.find(g => g._id === groupId);
+                
+                // If not found in Redux, fetch directly from API
+                if (!group) {
+                    console.log('Group not found in Redux, fetching from API...');
+                    const response = await API.get(`/groups/${groupId}`);
+                    group = response.data;
                 }
 
                 if (!group) {
@@ -202,17 +205,16 @@ const GroupChat = () => {
                 }
 
                 setGroupInfo(group);
-                // In a real app, you would fetch messages for the group here
-                // loadMessages(); 
+                setLoading(false);
             } catch (error) {
-                setError('Failed to load group');
-            } finally {
+                console.error('Error loading group:', error);
+                setError('Failed to load group. Please try refreshing the page.');
                 setLoading(false);
             }
         };
 
         loadGroup();
-    }, [groupId, inviteLink, currentUser, navigate, groups, dispatch]);
+    }, [groupId, currentUser, groups]);
 
     // Detect new messages when not at bottom
     useEffect(() => {
