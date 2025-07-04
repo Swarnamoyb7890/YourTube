@@ -13,6 +13,10 @@ import groupRoutes from './Routes/groups.js'
 import messageRoutes from './Routes/messages.js'
 import razorpayRoutes from './Routes/razorpay.js'
 
+// Import models to ensure they are registered
+import './Models/Auth.js'
+import './Models/Group.js'
+
 dotenv.config()
 const app = express()
 

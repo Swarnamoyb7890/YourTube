@@ -1,4 +1,5 @@
 import Group from '../Models/Group.js';
+import User from '../Models/Auth.js';
 import mongoose from 'mongoose';
 
 export const createGroup = async (req, res) => {
@@ -24,9 +25,20 @@ export const createGroup = async (req, res) => {
 
 export const getGroups = async (req, res) => {
     try {
-        const groups = await Group.find().populate('members');
+        const groups = await Group.find().populate({
+            path: 'members',
+            select: 'name email',
+            model: 'User'
+        });
+        console.log('Fetched groups with members:', groups.map(g => ({
+            id: g._id,
+            name: g.name,
+            membersCount: g.members?.length,
+            members: g.members?.map(m => ({ id: m._id, name: m.name, email: m.email }))
+        })));
         res.status(200).json(groups);
     } catch (error) {
+        console.error('Error fetching groups:', error);
         res.status(500).json({ message: 'Error fetching groups', error: error.message });
     }
 };
@@ -115,6 +127,7 @@ export const joinGroup = async (req, res) => {
         await group.save();
 
         console.log('User added to group successfully');
+        console.log('Group members after adding user:', group.members);
 
         // Populate the members to return full user data
         await group.populate('members');
@@ -145,8 +158,26 @@ export const getGroupById = async (req, res) => {
             return res.status(400).json({ message: 'Invalid group ID format' });
         }
 
-        const group = await Group.findById(groupId).populate('members');
-        console.log('Group found:', group ? { id: group._id, name: group.name, membersCount: group.members?.length } : 'null');
+        const group = await Group.findById(groupId).populate({
+            path: 'members',
+            select: 'name email',
+            model: 'User'
+        });
+
+        // Debug: Check if we can find the users directly
+        if (group && group.members && group.members.length > 0) {
+            const userIds = group.members.map(m => m._id || m);
+            console.log('Looking for users with IDs:', userIds);
+            const users = await User.find({ _id: { $in: userIds } }).select('name email');
+            console.log('Found users:', users.map(u => ({ id: u._id, name: u.name, email: u.email })));
+        }
+
+        console.log('Group found:', group ? {
+            id: group._id,
+            name: group.name,
+            membersCount: group.members?.length,
+            members: group.members?.map(m => ({ id: m._id, name: m.name, email: m.email }))
+        } : 'null');
 
         if (!group) {
             console.log('Group not found for ID:', groupId);

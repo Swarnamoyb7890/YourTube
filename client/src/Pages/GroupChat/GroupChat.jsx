@@ -12,13 +12,22 @@ import { fetchMessages, sendMessage, editMessage as editMessageAction, deleteMes
 import { API } from '../../Api';
 
 const UserAvatar = ({ user }) => {
-    if (!user || !user.name) {
-        return null; // Don't render anything if the user data isn't loaded yet
+    if (!user) {
+        return (
+            <div className="user-avatar">
+                <div className="avatar-initial">?</div>
+                <div className="user-status online"></div>
+            </div>
+        );
     }
+    
+    const displayName = user.name || user.email || 'Unknown';
+    const initial = displayName.charAt(0).toUpperCase();
+    
     return (
         <div className="user-avatar">
             <div className="avatar-initial">
-                {user.name.charAt(0).toUpperCase()}
+                {initial}
             </div>
             <div className="user-status online"></div>
         </div>
@@ -204,6 +213,8 @@ const GroupChat = () => {
                     throw new Error('Group not found');
                 }
 
+                console.log('Group data loaded:', group);
+                console.log('Members data:', group.members);
                 setGroupInfo(group);
                 setLoading(false);
             } catch (error) {
@@ -358,12 +369,15 @@ const GroupChat = () => {
                         </div>
                     </div>
                     <div className="members-list">
-                        {groupInfo?.members?.map(member => (
-                            <div key={member._id} className="member-item">
-                                <UserAvatar user={member} />
-                                <div>{member.name}</div>
-                            </div>
-                        ))}
+                        {groupInfo?.members?.map(member => {
+                            console.log('Member data:', member);
+                            return (
+                                <div key={member._id} className="member-item">
+                                    <UserAvatar user={member} />
+                                    <div>{member.name || member.email || 'Unknown User'}</div>
+                                </div>
+                            );
+                        })}
                     </div>
                     
                     {/* Invite Link Section */}
