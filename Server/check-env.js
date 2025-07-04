@@ -30,6 +30,7 @@ const requiredVars = {
     },
     'Server': {
         'PORT': process.env.PORT || '5000',
+        'FRONTEND_URL': process.env.FRONTEND_URL || 'https://yourtubesb.netlify.app',
         required: false
     }
 };

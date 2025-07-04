@@ -137,7 +137,8 @@ app.get('/', (req, res) => {
             payment: process.env.RAZORPAY_KEY_ID ? "Razorpay (configured)" : "Razorpay (not configured)",
             email: process.env.EMAIL_USER ? "Email (configured)" : "Email (not configured)",
             sms: process.env.TWILIO_ACCOUNT_SID ? "SMS (configured)" : "SMS (not configured)"
-        }
+        },
+        frontend_url: process.env.FRONTEND_URL || 'https://yourtubesb.netlify.app'
     });
 });
 
@@ -151,6 +152,21 @@ app.get('/test-cors', (req, res) => {
         origin: origin,
         timestamp: new Date().toISOString()
     });
+});
+
+// Handle group join redirects from old invite links
+app.get('/group/join/:groupId', (req, res) => {
+    const { groupId } = req.params;
+    const frontendUrl = process.env.FRONTEND_URL || 'https://yourtubesb.netlify.app';
+    const redirectUrl = `${frontendUrl}/group/join/${groupId}`;
+
+    console.log('Redirecting group join request:', {
+        groupId,
+        from: req.originalUrl,
+        to: redirectUrl
+    });
+
+    res.redirect(redirectUrl);
 });
 
 app.use('/user', userroutes);
