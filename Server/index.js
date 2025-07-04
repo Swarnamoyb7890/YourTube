@@ -30,14 +30,47 @@ app.use((req, res, next) => {
 
 // Serve static video files with proper headers
 app.use('/uploads', (req, res, next) => {
+    // Get the origin from the request
+    const origin = req.headers.origin;
+
+    // Debug logging
+    console.log('Video request:', {
+        url: req.url,
+        origin: origin,
+        method: req.method,
+        userAgent: req.headers['user-agent']
+    });
+
+    // Define allowed origins for video files
+    const allowedVideoOrigins = [
+        'https://yourtube-client.netlify.app',
+        'https://yourtubesb.netlify.app',
+        'https://your-tube-client.netlify.app',
+        'http://localhost:3000'
+    ];
+
     // Set CORS headers for video files
-    res.setHeader('Access-Control-Allow-Origin', 'https://yourtube-client.netlify.app');
+    if (origin && allowedVideoOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        console.log('CORS: Using specific origin:', origin);
+    } else if (origin && origin.includes('netlify.app')) {
+        // Allow any netlify.app domain for flexibility
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        console.log('CORS: Using netlify.app origin:', origin);
+    } else {
+        // Default fallback
+        res.setHeader('Access-Control-Allow-Origin', 'https://yourtubesb.netlify.app');
+        console.log('CORS: Using default origin for:', origin);
+    }
+
     res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Range, Content-Type');
     res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
 
     // Handle preflight requests
     if (req.method === 'OPTIONS') {
+        console.log('CORS: Handling preflight request');
         res.status(200).end();
         return;
     }
@@ -105,6 +138,18 @@ app.get('/', (req, res) => {
             email: process.env.EMAIL_USER ? "Email (configured)" : "Email (not configured)",
             sms: process.env.TWILIO_ACCOUNT_SID ? "SMS (configured)" : "SMS (not configured)"
         }
+    });
+});
+
+// Test CORS endpoint
+app.get('/test-cors', (req, res) => {
+    const origin = req.headers.origin;
+    console.log('CORS test request from:', origin);
+
+    res.json({
+        message: "CORS test successful",
+        origin: origin,
+        timestamp: new Date().toISOString()
     });
 });
 
