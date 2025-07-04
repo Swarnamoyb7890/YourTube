@@ -112,3 +112,51 @@
 .notification-popup p:last-child {
     border-bottom: none;
 }
+
+@media (max-width: 768px) {
+    .Container_Navbar {
+        flex-direction: column;
+        height: auto;
+        min-height: 56px;
+        padding: 0.5rem 0.2rem;
+    }
+
+    .Burger_Logo_Navbar {
+        height: 2.5rem;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .logo_div_Navbar img {
+        height: 28px;
+        width: 28px;
+    }
+
+    .logo_title_navbar {
+        font-size: 1.1rem;
+        margin-left: 0.4rem;
+    }
+
+    .Auth_cont_Navbar {
+        margin: 0.3rem 0 0.3rem 0;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .vid_bell_Navbar {
+        margin: 0 0.3rem;
+    }
+
+    .burger {
+        margin-left: 0.2rem;
+        margin-right: 0.4rem;
+        padding: 0.3rem;
+    }
+
+    .searchbar-container,
+    .Searchbar {
+        width: 100% !important;
+        min-width: 0;
+        margin: 0.5rem 0 0.5rem 0;
+    }
+}

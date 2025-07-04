@@ -1,5 +1,22 @@
-.Container_ShowVideoGrid{
+.Container_ShowVideoGrid {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
+}
+
+@media (max-width: 768px) {
+    .Container_ShowVideoGrid {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 0 0.5rem;
+    }
+
+    .video_box_app {
+        width: 100% !important;
+        max-width: 100vw;
+        margin-bottom: 1.2rem;
+        box-sizing: border-box;
+    }
 }
