@@ -6,11 +6,16 @@ export const createGroup = async (req, res) => {
         const { name, members, creator } = req.body;
         const group = new Group({ name, members, creator });
         await group.save();
+
         // Generate invite link after _id is available
-        // Use frontend URL for invite links
         const frontendUrl = process.env.FRONTEND_URL || 'https://yourtubesb.netlify.app';
-        group.inviteLink = `${frontendUrl}/group/join/${group._id}`;
+        const inviteLink = `${frontendUrl}/group/join/${group._id}`;
+
+        // Save invite link in both inviteLink field and description
+        group.inviteLink = inviteLink;
+        group.description = `Invite Link: ${inviteLink}\n\nShare this link with others to invite them to the group.`;
         await group.save();
+
         res.status(201).json(group);
     } catch (error) {
         res.status(500).json({ message: 'Error creating group', error: error.message });
@@ -142,5 +147,43 @@ export const getGroupById = async (req, res) => {
     } catch (error) {
         console.error('Error fetching group:', error);
         res.status(500).json({ message: 'Error fetching group', error: error.message });
+    }
+};
+
+export const regenerateInviteLink = async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const { userId } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+
+        const group = await Group.findById(groupId);
+        if (!group) {
+            return res.status(404).json({ message: 'Group not found' });
+        }
+
+        // Check if user is the creator
+        if (group.creator.toString() !== userId) {
+            return res.status(403).json({ message: 'Only the group creator can regenerate invite links' });
+        }
+
+        // Generate new invite link
+        const frontendUrl = process.env.FRONTEND_URL || 'https://yourtubesb.netlify.app';
+        const inviteLink = `${frontendUrl}/group/join/${group._id}`;
+
+        // Update invite link and description
+        group.inviteLink = inviteLink;
+        group.description = `Invite Link: ${inviteLink}\n\nShare this link with others to invite them to the group.`;
+        await group.save();
+
+        res.status(200).json({
+            message: 'Invite link regenerated successfully',
+            group: group
+        });
+    } catch (error) {
+        console.error('Error regenerating invite link:', error);
+        res.status(500).json({ message: 'Error regenerating invite link', error: error.message });
     }
 }; 

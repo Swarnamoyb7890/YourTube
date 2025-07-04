@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateGroupData, getGroups } from '../../action/groups';
-import { FaUsers, FaPaperPlane, FaEllipsisV, FaEdit, FaTrash, FaCheck, FaTimes, FaArrowDown, FaCircle } from 'react-icons/fa';
+import { FaUsers, FaPaperPlane, FaEllipsisV, FaEdit, FaTrash, FaCheck, FaTimes, FaArrowDown, FaCircle, FaCopy, FaLink } from 'react-icons/fa';
 import './Styles/variables.css';
 import './Styles/chat.css';
 import './Styles/messages.css';
@@ -154,6 +154,8 @@ const GroupChat = () => {
     const messagesContainerRef = useRef(null);
     const [groupInfo, setGroupInfo] = useState(null);
     const [showGroupMenu, setShowGroupMenu] = useState(false);
+    const [showInviteLink, setShowInviteLink] = useState(false);
+    const [copySuccess, setCopySuccess] = useState(false);
 
     useEffect(() => {
         dispatch(getGroups());
@@ -287,6 +289,42 @@ const GroupChat = () => {
         }
     };
 
+    const handleCopyInviteLink = async () => {
+        if (!groupInfo?.inviteLink) return;
+        
+        try {
+            await navigator.clipboard.writeText(groupInfo.inviteLink);
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        } catch (err) {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = groupInfo.inviteLink;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        }
+    };
+
+    const handleRegenerateInviteLink = async () => {
+        if (!groupInfo || !currentUser?.result?._id) return;
+        
+        try {
+            const response = await API.post(`/groups/${groupInfo._id}/regenerate-invite`, {
+                userId: currentUser.result._id
+            });
+            
+            // Update the group info with new invite link
+            setGroupInfo(response.data.group);
+            setShowInviteLink(true);
+        } catch (err) {
+            alert('Failed to regenerate invite link.');
+        }
+    };
+
     if (!currentUser?.result) {
         return (
             <div className="group-chat-page">
@@ -325,6 +363,52 @@ const GroupChat = () => {
                             </div>
                         ))}
                     </div>
+                    
+                    {/* Invite Link Section */}
+                    {groupInfo && (
+                        <div className="invite-link-section">
+                            <div className="invite-link-header">
+                                <FaLink style={{ marginRight: '8px' }} />
+                                <span>Invite Link</span>
+                            </div>
+                            
+                            {groupInfo.inviteLink && (
+                                <div className="invite-link-container">
+                                    <div className="invite-link-display">
+                                        <input
+                                            type="text"
+                                            value={groupInfo.inviteLink}
+                                            readOnly
+                                            className="invite-link-input"
+                                        />
+                                        <button
+                                            onClick={handleCopyInviteLink}
+                                            className="copy-link-btn"
+                                            title="Copy invite link"
+                                        >
+                                            <FaCopy />
+                                        </button>
+                                    </div>
+                                    
+                                    {copySuccess && (
+                                        <div className="copy-success">
+                                            ✅ Link copied to clipboard!
+                                        </div>
+                                    )}
+                                    
+                                    {groupInfo.creator === currentUser?.result?._id && (
+                                        <button
+                                            onClick={handleRegenerateInviteLink}
+                                            className="regenerate-link-btn"
+                                            title="Generate new invite link"
+                                        >
+                                            🔄 Regenerate Link
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
                 <div className="chat-main">
                     <div className="chat-header">

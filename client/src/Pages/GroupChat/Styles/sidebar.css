@@ -122,6 +122,112 @@
     letter-spacing: 0.2px;
 }
 
+/* Invite Link Section */
+.invite-link-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.invite-link-header {
+    display: flex;
+    align-items: center;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.invite-link-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.invite-link-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.invite-link-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-family: monospace;
+    cursor: text;
+    outline: none;
+}
+
+.invite-link-input:focus {
+    border-color: var(--primary-color);
+}
+
+.copy-link-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+}
+
+.copy-link-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.copy-success {
+    color: #00b894;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 5px;
+    background: rgba(0, 184, 148, 0.1);
+    border-radius: 4px;
+    animation: fadeIn 0.3s ease;
+}
+
+.regenerate-link-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.8rem;
+    font-weight: 500;
+    width: 100%;
+}
+
+.regenerate-link-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .chat-sidebar {
@@ -152,6 +258,26 @@
     .member-avatar {
         width: 35px;
         height: 35px;
+    }
+
+    .invite-link-section {
+        margin-top: 15px;
+        padding: 12px;
+    }
+
+    .invite-link-input {
+        font-size: 0.7rem;
+        padding: 6px 10px;
+    }
+
+    .copy-link-btn {
+        padding: 6px 10px;
+        min-width: 35px;
+    }
+
+    .regenerate-link-btn {
+        font-size: 0.75rem;
+        padding: 6px 10px;
     }
 }
 

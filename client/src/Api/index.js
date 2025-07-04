@@ -164,6 +164,7 @@ export const createGroup = (groupData) => API.post('/groups', groupData);
 export const getGroups = () => API.get('/groups');
 export const updateGroup = (id, groupData) => API.patch(`/groups/${id}`, groupData);
 export const deleteGroup = (id) => API.delete(`/groups/${id}`);
+export const regenerateInviteLink = (groupId, userId) => API.post(`/groups/${groupId}/regenerate-invite`, { userId });
 
 export const postMessage = (messageData) => API.post('/messages', messageData);
 export const getMessages = (groupId) => API.get(`/messages/${groupId}`);
