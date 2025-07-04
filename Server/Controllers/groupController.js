@@ -1,4 +1,5 @@
 import Group from '../Models/Group.js';
+import mongoose from 'mongoose';
 
 export const createGroup = async (req, res) => {
     try {
@@ -66,24 +67,52 @@ export const joinGroup = async (req, res) => {
         const { groupId } = req.params;
         const { userId, userName } = req.body;
 
+        console.log('Join group request:', { groupId, userId, userName });
+
         if (!userId || !userName) {
+            console.log('Missing required fields:', { userId, userName });
             return res.status(400).json({ message: 'User ID and name are required' });
+        }
+
+        // Validate userId is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            console.log('Invalid userId format:', userId);
+            return res.status(400).json({ message: 'Invalid user ID format' });
+        }
+
+        // Validate groupId is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(groupId)) {
+            console.log('Invalid groupId format:', groupId);
+            return res.status(400).json({ message: 'Invalid group ID format' });
         }
 
         const group = await Group.findById(groupId);
         if (!group) {
+            console.log('Group not found:', groupId);
             return res.status(404).json({ message: 'Group not found' });
         }
 
+        console.log('Found group:', {
+            groupId: group._id,
+            name: group.name,
+            currentMembers: group.members.length
+        });
+
         // Check if user is already a member
-        const isAlreadyMember = group.members.some(member => member.userId === userId);
+        const isAlreadyMember = group.members.some(member => member.toString() === userId);
         if (isAlreadyMember) {
+            console.log('User already a member:', userId);
             return res.status(400).json({ message: 'User is already a member of this group' });
         }
 
-        // Add user to group
-        group.members.push({ userId, userName });
+        // Add user to group (just the userId as ObjectId)
+        group.members.push(userId);
         await group.save();
+
+        console.log('User added to group successfully');
+
+        // Populate the members to return full user data
+        await group.populate('members');
 
         res.status(200).json({
             message: 'Successfully joined group',
@@ -91,6 +120,11 @@ export const joinGroup = async (req, res) => {
         });
     } catch (error) {
         console.error('Error joining group:', error);
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
         res.status(500).json({ message: 'Error joining group', error: error.message });
     }
 };
