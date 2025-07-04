@@ -11,6 +11,7 @@ import multer from 'multer'
 import { uploadsDir } from './Helper/filehelper.js'
 import groupRoutes from './Routes/groups.js'
 import messageRoutes from './Routes/messages.js'
+import razorpayRoutes from './Routes/razorpay.js'
 
 dotenv.config()
 const app = express()
@@ -27,16 +28,26 @@ app.use((req, res, next) => {
     next();
 });
 
-// Correctly serve static video files
+// Serve static video files with proper headers
 app.use('/uploads', (req, res, next) => {
+    // Set CORS headers for video files
+    res.setHeader('Access-Control-Allow-Origin', 'https://yourtube-client.netlify.app');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Range, Content-Type');
     res.setHeader('Accept-Ranges', 'bytes');
-    cors()(req, res, next);
-}, (req, res, next) => {
-    express.static(uploadsDir)(req, res, next);
-});
+
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
+
+    next();
+}, express.static(uploadsDir));
 
 // CORS configuration for API routes
 const allowedOrigins = [
+    'http://localhost:3000',
     'https://yourtubesb.netlify.app',
     'https://your-tube-client.netlify.app'
 ];
@@ -90,6 +101,7 @@ app.use('/video', videoroutes);
 app.use('/comment', commentroutes);
 app.use('/groups', groupRoutes);
 app.use('/messages', messageRoutes);
+app.use('/api/razorpay', razorpayRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

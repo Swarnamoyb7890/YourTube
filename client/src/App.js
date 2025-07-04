@@ -15,8 +15,10 @@ import { getallhistory } from './action/history';
 import { getalllikedvideo } from './action/likedvideo';
 import { getallwatchlater } from './action/watchlater';
 import { getGroups } from './action/groups';
+import { useTheme } from './ThemeContext';
 
 function App() {
+  const { theme } = useTheme();
   const [toggledrawersidebar, settogledrawersidebar] = useState({
     display: "none"
   });
@@ -47,17 +49,19 @@ function App() {
   const [editcreatechanelbtn, seteditcreatechanelbtn] = useState(false);
   const [videouploadpage, setvideouploadpage] = useState(false);
   return (
-    <Router>
-      {
-        videouploadpage && <Videoupload setvideouploadpage={setvideouploadpage} />
-      }
-      {editcreatechanelbtn && (
-        <Createeditchannel seteditcreatechanelbtn={seteditcreatechanelbtn} />
-      )}
-      <Navbar seteditcreatechanelbtn={seteditcreatechanelbtn} toggledrawer={toggledrawer} />
-      <Drawersliderbar toggledraw={toggledrawer} toggledrawersidebar={toggledrawersidebar} />
-      <Allroutes seteditcreatechanelbtn={seteditcreatechanelbtn} setvideouploadpage={setvideouploadpage} />
-    </Router>
+    <div className={theme === 'white' ? 'theme-white' : 'theme-dark'}>
+      <Router>
+        {
+          videouploadpage && <Videoupload setvideouploadpage={setvideouploadpage} />
+        }
+        {editcreatechanelbtn && (
+          <Createeditchannel seteditcreatechanelbtn={seteditcreatechanelbtn} />
+        )}
+        <Navbar seteditcreatechanelbtn={seteditcreatechanelbtn} toggledrawer={toggledrawer} />
+        <Drawersliderbar toggledraw={toggledrawer} toggledrawersidebar={toggledrawersidebar} />
+        <Allroutes seteditcreatechanelbtn={seteditcreatechanelbtn} setvideouploadpage={setvideouploadpage} />
+      </Router>
+    </div>
   );
 }
 

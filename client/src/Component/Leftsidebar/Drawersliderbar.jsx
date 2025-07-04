@@ -13,8 +13,10 @@ const Drawersliderbar = ({ toggledraw, toggledrawersidebar }) => {
   const groups = useSelector(state => state.groups.data);
   const currentUser = useSelector(state => state.currentuserreducer);
 
-  // Filter groups where the current user is a member
-  const userGroups = groups?.filter(group => group.members.includes(currentUser?.result?._id));
+  // Correctly filter groups where the current user is a member
+  const userGroups = groups?.filter(group => 
+    group.members.some(member => member._id === currentUser?.result?._id)
+  );
 
   return (
     <div className="container_DrawaerLeftSidebar" style={toggledrawersidebar}>

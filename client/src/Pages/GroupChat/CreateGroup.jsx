@@ -23,18 +23,17 @@ const CreateGroup = () => {
 
         const groupData = {
             name: groupName,
-            members: [currentUser.result._id] // Send member IDs
+            members: [currentUser?.result?._id],
+            creator: currentUser?.result?._id
         };
 
         try {
             const newGroup = await dispatch(createGroup(groupData));
             if (newGroup && newGroup._id) {
-                // In a real app, the backend would generate and return the invite link
-                const generatedInviteLink = `${window.location.origin}/group/join/${newGroup._id}`;
-                setInviteLink(generatedInviteLink);
-                
-                // Navigate to the group chat
-                navigate(`/group/${newGroup._id}`);
+                setInviteLink(newGroup.inviteLink);
+                setTimeout(() => {
+                    navigate(`/group/${newGroup._id}`);
+                }, 5000); // Show the link for 5 seconds before redirecting
             } else {
                 setError('Failed to create group. Please try again.');
             }
@@ -99,7 +98,7 @@ const CreateGroup = () => {
                             </button>
                         </div>
                         <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>
-                            Redirecting to group chat in 2 seconds...
+                            Redirecting to group chat in 5 seconds...
                         </p>
                     </div>
                 )}

@@ -20,8 +20,13 @@ const createAxiosRetryInterceptor = (instance, maxRetries = 3) => {
     });
 };
 
+// Get base URL from environment or default to localhost for development
+const getBaseURL = () => {
+    return process.env.REACT_APP_API_BASE_URL || 'https://yourtube-atxv.onrender.com';
+};
+
 export const API = axios.create({
-    baseURL: 'https://yourtube-atxv.onrender.com',
+    baseURL: getBaseURL(),
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -159,3 +164,21 @@ export const createGroup = (groupData) => API.post('/groups', groupData);
 export const getGroups = () => API.get('/groups');
 export const updateGroup = (id, groupData) => API.patch(`/groups/${id}`, groupData);
 export const deleteGroup = (id) => API.delete(`/groups/${id}`);
+
+export const postMessage = (messageData) => API.post('/messages', messageData);
+export const getMessages = (groupId) => API.get(`/messages/${groupId}`);
+export const editMessage = (id, content) => API.put(`/messages/${id}`, { content });
+export const deleteMessage = (id) => API.delete(`/messages/${id}`);
+
+export const upgradeUserPlan = (userId, plan) => API.post(`/user/upgrade-plan/${userId}`, { plan });
+
+// Razorpay Payment APIs
+export const createRazorpayOrder = (orderData) => API.post('/api/razorpay/order', orderData);
+export const verifyPayment = (paymentData) => API.post('/api/razorpay/verify', paymentData);
+
+export const sendLoginOtp = (email) => API.post('/user/send-login-otp', { email });
+export const verifyLoginOtp = (email, otp) => API.post('/user/verify-login-otp', { email, otp });
+
+export const sendSmsOtp = (mobile) => API.post('/user/send-sms-otp', { mobile });
+export const verifySmsOtp = (mobile, otp) => API.post('/user/verify-sms-otp', { mobile, otp });
+export const sendSmsOtpByEmail = (email) => API.post('/user/send-sms-otp-by-email', { email });

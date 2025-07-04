@@ -11,7 +11,7 @@ const WHL = ({page,videolist}) => {
     const handleclearhistory=()=>{
         if(currentuser){
             dispatch(clearhistory({
-                userid:currentuser?.result._id
+                userid:currentuser?.result?._id
             }))
         }
     }
@@ -30,7 +30,7 @@ const WHL = ({page,videolist}) => {
                 <div className="rightSide_whl">
                     <h1>{page}</h1>
                     <div className="whl_list">
-                        <WHLvideolist page={page} currentuser={currentuser.result._id} videolist={videolist}/>
+                        <WHLvideolist page={page} currentuser={currentuser?.result?._id} videolist={videolist}/>
                     </div>
                 </div>
             </p>

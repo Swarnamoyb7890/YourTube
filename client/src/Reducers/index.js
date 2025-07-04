@@ -8,6 +8,7 @@ import historyreducer from "./history";
 import likedvideoreducer from "./likedvideo";
 import watchlaterreducer from "./watchlater";
 import groupsReducer from "./groups";
+import messages from './messages';
 
 export default combineReducers({
     authreducer,
@@ -18,5 +19,6 @@ export default combineReducers({
     historyreducer,
     likedvideoreducer,
     watchlaterreducer,
-    groups: groupsReducer
+    groups: groupsReducer,
+    messages
 });

@@ -9,6 +9,7 @@ import { legacy_createStore as createstore } from "redux"
 import { thunk } from "redux-thunk"
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import Reducers from './Reducers';
+import { ThemeProvider } from './ThemeContext';
 const store = createstore(Reducers, compose(applyMiddleware(thunk)));
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -16,7 +17,9 @@ root.render(
   <Provider store={store}>
     <GoogleOAuthProvider clientId="999415329359-3u4igc9aom2slg61791alhctppbacnag.apps.googleusercontent.com">
       <React.StrictMode>
-        <App />
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
       </React.StrictMode>
     </GoogleOAuthProvider>
   </Provider>

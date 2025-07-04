@@ -66,8 +66,8 @@ const Videoupload = ({ setvideouploadpage }) => {
         throw new Error("Please attach a video file");
       }
 
-      if (videofile.size > 50 * 1024 * 1024) {
-        throw new Error("Please attach a video file less than 50MB");
+      if (videofile.size > 500 * 1024 * 1024) {
+        throw new Error("Please attach a video file less than 500MB");
       }
 
       console.log("Starting upload with:", {

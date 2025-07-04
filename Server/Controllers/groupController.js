@@ -2,8 +2,11 @@ import Group from '../Models/Group.js';
 
 export const createGroup = async (req, res) => {
     try {
-        const { name, members } = req.body;
-        const group = new Group({ name, members });
+        const { name, members, creator } = req.body;
+        const group = new Group({ name, members, creator });
+        await group.save();
+        // Generate invite link after _id is available
+        group.inviteLink = `${req.protocol}://${req.get('host')}/group/join/${group._id}`;
         await group.save();
         res.status(201).json(group);
     } catch (error) {
@@ -41,10 +44,15 @@ export const updateGroup = async (req, res) => {
 export const deleteGroup = async (req, res) => {
     try {
         const { id } = req.params;
-        const deletedGroup = await Group.findByIdAndDelete(id);
-        if (!deletedGroup) {
+        const { userId } = req.query;
+        const group = await Group.findById(id);
+        if (!group) {
             return res.status(404).json({ message: 'Group not found' });
         }
+        if (group.creator.toString() !== userId) {
+            return res.status(403).json({ message: 'Only the creator can delete this group.' });
+        }
+        await group.deleteOne();
         res.status(200).json({ message: 'Group deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error deleting group', error: error.message });

@@ -29,9 +29,9 @@ const Comment = ({ videoid }) => {
             else {
                 dispatch(postcomment({
                     videoid: videoid,
-                    userid: currentuser?.result._id,
+                    userid: currentuser?.result?._id,
                     commentbody: commenttext,
-                    usercommented: currentuser.result.name
+                    usercommented: currentuser?.result?.name
                 }))
                 setcommentext("")
             }
@@ -48,10 +48,9 @@ const Comment = ({ videoid }) => {
                 <input type="submit" value="add" className='comment_add_btn_comments' />
             </form>
             <div className="display_comment_container">
-                {commentlist?.data.filter((q) => videoid === q?.videoid)
+                {(commentlist?.data || []).filter((q) => videoid === q?.videoid)
                     .reverse()
                     .map((m) => {
-
                         return (<Displaycommment cid={m._id} userid={m.userid} commentbody={m.commentbody} commenton={m.commenton} usercommented={m.usercommented} />)
                     })}
             </div>

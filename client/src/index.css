@@ -59,3 +59,15 @@ code {
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
 }
+
+.theme-white {
+  background: #fff;
+  color: #222;
+  transition: background 0.3s, color 0.3s;
+}
+
+.theme-dark {
+  background: #181818;
+  color: #f5f5f5;
+  transition: background 0.3s, color 0.3s;
+}

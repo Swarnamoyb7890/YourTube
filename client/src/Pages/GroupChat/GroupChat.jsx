@@ -8,6 +8,8 @@ import './Styles/chat.css';
 import './Styles/messages.css';
 import './Styles/sidebar.css';
 import './Styles/user.css';
+import { fetchMessages, sendMessage, editMessage as editMessageAction, deleteMessage as deleteMessageAction } from '../../action/messages';
+import { API } from '../../Api';
 
 const UserAvatar = ({ user }) => {
     if (!user || !user.name) {
@@ -24,7 +26,7 @@ const UserAvatar = ({ user }) => {
 };
 
 const Message = ({ message, currentUser, onEdit, onDelete }) => {
-    const isSentByMe = message.sender === currentUser.result._id;
+    const isSentByMe = message.sender === currentUser?.result?._id;
     const [isEditing, setIsEditing] = useState(false);
     const [editedContent, setEditedContent] = useState(message.content);
     const [showActions, setShowActions] = useState(false);
@@ -142,7 +144,7 @@ const GroupChat = () => {
     const dispatch = useDispatch();
     const currentUser = useSelector(state => state.currentuserreducer);
     const groups = useSelector(state => state.groups.data);
-    const [messages, setMessages] = useState([]);
+    const messages = useSelector(state => state.messages.data);
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -151,29 +153,23 @@ const GroupChat = () => {
     const messagesEndRef = useRef(null);
     const messagesContainerRef = useRef(null);
     const [groupInfo, setGroupInfo] = useState(null);
+    const [showGroupMenu, setShowGroupMenu] = useState(false);
 
     useEffect(() => {
         dispatch(getGroups());
     }, [dispatch]);
 
-    // Get random emoji for group icon
-    const getGroupEmoji = () => {
-        const emojis = ['🚀', '💬', '🎯', '🎮', '💡', '🎨', '🎵', '📚', '🌟', '🎪'];
-        const index = groupId ? Math.abs(groupId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % emojis.length : 0;
-        return emojis[index];
-    };
+    useEffect(() => {
+        if (groupId) {
+            dispatch(fetchMessages(groupId));
+        }
+    }, [dispatch, groupId]);
 
     useEffect(() => {
         if (!currentUser?.result) {
             setError('Please log in to access the group chat.');
             return;
         }
-
-        const loadMessages = () => {
-            const groupMessages = JSON.parse(localStorage.getItem(`messages_${groupId}`) || '[]');
-            setMessages(groupMessages);
-            scrollToBottom();
-        };
 
         const loadGroup = () => {
             if (!groups) {
@@ -185,7 +181,7 @@ const GroupChat = () => {
                 if (inviteLink) {
                     group = groups.find(g => g.inviteLink === inviteLink);
                     if (group) {
-                        if (!group.members.find(m => m._id === currentUser.result._id)) {
+                        if (!group.members.find(m => m._id === currentUser?.result?._id)) {
                             const updatedGroup = {
                                 ...group,
                                 members: [...group.members, currentUser.result]
@@ -246,47 +242,24 @@ const GroupChat = () => {
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!newMessage.trim()) return;
-
-        const newMsg = {
-            _id: Math.random().toString(36).substring(7),
+        const messageData = {
             groupId,
             sender: currentUser.result._id,
             senderName: currentUser.result.name,
-            content: newMessage.trim(),
-            createdAt: new Date().toISOString()
+            content: newMessage.trim()
         };
-
-        const groupMessages = JSON.parse(localStorage.getItem(`messages_${groupId}`) || '[]');
-        groupMessages.push(newMsg);
-        localStorage.setItem(`messages_${groupId}`, JSON.stringify(groupMessages));
-        
+        await dispatch(sendMessage(messageData));
         setNewMessage('');
-        setMessages(groupMessages);
         scrollToBottom();
     };
 
-    const handleEditMessage = (messageId, newContent) => {
-        const groupMessages = JSON.parse(localStorage.getItem(`messages_${groupId}`) || '[]');
-        const updatedMessages = groupMessages.map(msg => {
-            if (msg._id === messageId) {
-                return {
-                    ...msg,
-                    content: newContent,
-                    isEdited: true
-                };
-            }
-            return msg;
-        });
-        localStorage.setItem(`messages_${groupId}`, JSON.stringify(updatedMessages));
-        setMessages(updatedMessages);
+    const handleEditMessage = async (messageId, newContent) => {
+        await dispatch(editMessageAction(messageId, newContent));
     };
 
-    const handleDeleteMessage = (messageId) => {
+    const handleDeleteMessage = async (messageId) => {
         if (window.confirm('Are you sure you want to delete this message?')) {
-            const groupMessages = JSON.parse(localStorage.getItem(`messages_${groupId}`) || '[]');
-            const updatedMessages = groupMessages.filter(msg => msg._id !== messageId);
-            localStorage.setItem(`messages_${groupId}`, JSON.stringify(updatedMessages));
-            setMessages(updatedMessages);
+            await dispatch(deleteMessageAction(messageId));
         }
     };
 
@@ -294,6 +267,23 @@ const GroupChat = () => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSendMessage(e);
+        }
+    };
+
+    const getGroupEmoji = () => {
+        const emojis = ['🚀', '💬', '🎯', '🎮', '💡', '🎨', '🎵', '📚', '🌟', '🎪'];
+        const index = groupId ? Math.abs(groupId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % emojis.length : 0;
+        return emojis[index];
+    };
+
+    const handleDeleteGroup = async () => {
+        if (!groupInfo || !currentUser?.result?._id) return;
+        if (!window.confirm('Are you sure you want to delete this group? This action cannot be undone.')) return;
+        try {
+            await API.delete(`/groups/${groupInfo._id}?userId=${currentUser.result._id}`);
+            navigate('/');
+        } catch (err) {
+            alert('Failed to delete group.');
         }
     };
 
@@ -352,10 +342,49 @@ const GroupChat = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="chat-header-actions">
-                            <button className="chat-header-btn" title="More options">
-                                <FaEllipsisV />
-                            </button>
+                        <div className="chat-header-actions" style={{ position: 'relative' }}>
+                            {groupInfo && groupInfo.creator === currentUser?.result?._id && (
+                                <>
+                                    <button className="chat-header-btn" title="More options" onClick={() => setShowGroupMenu(v => !v)}>
+                                        <FaEllipsisV />
+                                    </button>
+                                    {showGroupMenu && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '2.5rem',
+                                            right: 0,
+                                            background: '#222',
+                                            border: '1px solid #444',
+                                            borderRadius: '8px',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                            zIndex: 10,
+                                            minWidth: '140px',
+                                            padding: '0.5rem 0'
+                                        }}>
+                                            <button
+                                                onClick={() => { setShowGroupMenu(false); handleDeleteGroup(); }}
+                                                style={{
+                                                    width: '100%',
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: '#e74c3c',
+                                                    padding: '0.1rem 0.2rem',
+                                                    textAlign: 'left',
+                                                    cursor: 'pointer',
+                                                    fontWeight: 500,
+                                                    fontSize: '1rem',
+                                                    borderRadius: 0,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px'
+                                                }}
+                                            >
+                                                <FaTrash style={{ verticalAlign: 'middle' }} /> Delete Group
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </div>
                     <div 

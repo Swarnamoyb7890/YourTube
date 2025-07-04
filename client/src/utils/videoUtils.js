@@ -1,15 +1,34 @@
+// Get base URL from environment or default to localhost for development
+const getVideoBaseURL = () => {
+    return process.env.REACT_APP_VIDEO_BASE_URL || 'https://yourtube-atxv.onrender.com';
+};
+
 export const getVideoUrl = (filepath) => {
-    if (!filepath) return '';
+    if (!filepath) {
+        console.warn('No filepath provided for video URL');
+        return '';
+    }
 
-    // Use production server URL
-    const baseUrl = 'https://yourtube-atxv.onrender.com';
+    // Use local development server URL
+    const baseUrl = getVideoBaseURL();
 
-    // Remove any leading slashes and ensure the path starts with /uploads/
-    const normalizedPath = filepath.replace(/^\/+/, '');
+    // Clean up the filepath - remove any leading slashes and ensure proper format
+    let normalizedPath = filepath.replace(/^\/+/, '');
+
+    // If the path doesn't start with 'uploads/', add it
+    if (!normalizedPath.startsWith('uploads/')) {
+        normalizedPath = `uploads/${normalizedPath}`;
+    }
+
     const fullUrl = `${baseUrl}/${normalizedPath}`;
 
     // Debug logging
-    console.log('Video URL generated:', { filepath, normalizedPath, fullUrl });
+    console.log('Video URL generated:', {
+        originalFilepath: filepath,
+        normalizedPath,
+        fullUrl,
+        baseUrl
+    });
 
     return fullUrl;
 };

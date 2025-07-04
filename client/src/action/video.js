@@ -37,6 +37,7 @@ export const uploadvideo = (videodata) => async (dispatch) => {
                 console.log('Upload successful:', data);
 
                 // dispatch({ type: 'POST_VIDEO', payload: data });
+                console.log('Refreshing video list after upload...');
                 dispatch(getallvideo());
                 return data;
             } catch (error) {
@@ -75,6 +76,7 @@ export const getallvideo = () => async (dispatch) => {
         dispatch({ type: 'FETCH_ALL_VIDEOS', payload: data });
     } catch (error) {
         console.error('Error fetching videos:', error);
+        console.error('Error details:', error.response?.data || error.message);
     }
 };
 
@@ -99,3 +101,14 @@ export const viewvideo = (viewdata) => async (dispatch) => {
         console.error('Error updating views:', error);
     }
 }
+
+export const deleteVideo = (videoId) => async (dispatch) => {
+    try {
+        await api.deleteVideo(videoId);
+        console.log('Video deleted successfully');
+        dispatch(getallvideo()); // Refresh the video list
+    } catch (error) {
+        console.error('Error deleting video:', error);
+        throw error;
+    }
+};

@@ -18,15 +18,15 @@ const Likewatchlatersavebtns = ({vv,vid}) => {
   const likedvideolist=useSelector((state)=>state.likedvideoreducer)
   const watchlaterlist=useSelector((s)=>s.watchlaterreducer)
   useEffect(()=>{
-    likedvideolist?.data.filter(
-      (q)=>q.videoid ===vid && q.viewer ===currentuser.result._id
+    (likedvideolist?.data || []).filter(
+      (q)=>q.videoid ===vid && q.viewer ===currentuser?.result?._id
     )
     .map((m)=>setlikebtn(true));
-    watchlaterlist?.data.filter(
-      (q)=>q.videoid ===vid && q.viewer ===currentuser.result._id
+    (watchlaterlist?.data || []).filter(
+      (q)=>q.videoid ===vid && q.viewer ===currentuser?.result?._id
     )
     .map((m)=>setsavevideo(true));
-  },[]);
+  },[currentuser?.result?._id, likedvideolist?.data, vid, watchlaterlist?.data]);
 const togglesavedvideo=()=>{
   if(currentuser){
       if(savevideo){

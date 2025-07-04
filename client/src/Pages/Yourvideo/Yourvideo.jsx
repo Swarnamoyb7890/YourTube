@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 const Yourvideo = () => {
   const currentuser = useSelector((state) => state.currentuserreducer);
   const yourvideolist = useSelector((s) => s.videoreducer)
-    ?.data?.filter((q) => q.videochanel === currentuser?.result._id)
+    ?.data?.filter((q) => q.videochanel === currentuser?.result?._id)
     .reverse();
   // const yourvideolist=[
   //     {
@@ -58,7 +58,7 @@ const Yourvideo = () => {
           <h1>Your Video</h1>
           {currentuser ? (
             <>
-              <Showvideogrid vid={yourvideolist} />
+              <Showvideogrid vid={yourvideolist} showDeleteButton={true} />
             </>
           ) : (
             <>

@@ -1,7 +1,7 @@
 import express from "express"
 import { likevideocontroller } from "../Controllers/like.js";
 import { viewscontroller } from "../Controllers/views.js";
-import { uploadvideo, getallvideos } from "../Controllers/video.js";
+import { uploadvideo, getallvideos, deleteVideo } from "../Controllers/video.js";
 import { historycontroller, deletehistory, getallhistorycontroller } from "../Controllers/History.js";
 import { watchlatercontroller, getallwatchlatervontroller, deletewatchlater } from "../Controllers/watchlater.js";
 import { likedvideocontroller, getalllikedvideo, deletelikedvideo } from "../Controllers/likedvideo.js";
@@ -12,6 +12,7 @@ const routes = express.Router();
 routes.post("/uploadvideo", auth, upload.single("file"), uploadvideo)
 
 routes.get("/getvideos", getallvideos)
+routes.delete("/:id", auth, deleteVideo)
 routes.patch('/like/:id', auth, likevideocontroller)
 routes.patch('/view/:id', viewscontroller)
 

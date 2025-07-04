@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import Describechannel from './Describechannel'
 import Leftsidebar from '../../Component/Leftsidebar/Leftsidebar'
 import Showvideogrid from '../../Component/Showvideogrid/Showvideogrid'
-import vid from "../../Component/Video/vid.mp4";
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getallvideo } from '../../action/video';
@@ -30,7 +29,7 @@ const Channel = ({seteditcreatechanelbtn,setvideouploadpage}) => {
           seteditcreatechanelbtn={seteditcreatechanelbtn}
         />
         {vids && vids.length > 0 ? (
-          <Showvideogrid vids={vids}/>
+          <Showvideogrid vid={vids} showDeleteButton={true}/>
         ) : (
           <div style={{ color: 'white', textAlign: 'center', marginTop: '2rem' }}>
             {currentuser?.result?._id === cid ? (

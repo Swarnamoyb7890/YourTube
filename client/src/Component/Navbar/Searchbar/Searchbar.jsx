@@ -9,7 +9,14 @@ import { useSelector } from 'react-redux'
 const Searchbar = () => {
     const [Searchquery, setsearchquery] = useState("")
     const [searchlist, setsearchlist] = useState(false)
-    const Titlearray=useSelector(s=>s?.videoreducer)?.data?.filter(q=>q?.videotitle.toUpperCase().includes(Searchquery?.toUpperCase())).map(m=>m?.videotitle)
+    
+    // Add proper null checks to prevent the error
+    const videoData = useSelector(s => s?.videoreducer?.data) || [];
+    const Titlearray = videoData
+        .filter(q => q?.videotitle && q.videotitle.toUpperCase().includes(Searchquery?.toUpperCase()))
+        .map(m => m?.videotitle)
+        .filter(Boolean); // Remove any undefined titles
+    
     // const Titlearray = ["video1", "video2", "animation video", "Movies"].filter(q => q.toUpperCase().includes(Searchquery.toUpperCase()))
     return (
         <>

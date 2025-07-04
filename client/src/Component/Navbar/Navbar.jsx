@@ -13,12 +13,26 @@ import { login } from "../../action/auth";
 import { useGoogleLogin, googleLogout } from "@react-oauth/google";
 import { setcurrentuser } from "../../action/currentuser";
 import { jwtDecode } from "jwt-decode"; // <-- Import as jwt_decode
+import OtpModal from './OtpModal';
+import { sendLoginOtp, sendSmsOtpByEmail } from '../../Api';
+import { useTheme } from '../../ThemeContext';
+import MobileOtpModal from './MobileOtpModal';
+
+const southernStates = [
+  'tamil nadu', 'kerala', 'karnataka', 'andhra pradesh', 'telangana'
+];
 
 const Navbar = ({ toggledrawer, seteditcreatechanelbtn }) => {
   const [authbtn, setauthbtn] = useState(false);
   const [user, setuser] = useState(null);
   const [profile, setprofile] = useState({});
   const [shownotification, setshownotification] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpEmail, setOtpEmail] = useState('');
+  const [pendingProfile, setPendingProfile] = useState(null);
+  const { setTheme } = useTheme();
+  const [showMobileOtpModal, setShowMobileOtpModal] = useState(false);
+  const [mobileOtpSuccess, setMobileOtpSuccess] = useState(false);
 
   const dispatch = useDispatch();
   const currentuser = useSelector((state) => state.currentuserreducer);
@@ -46,13 +60,80 @@ const Navbar = ({ toggledrawer, seteditcreatechanelbtn }) => {
             },
           }
         )
-        .then((res) => {
+        .then(async (res) => {
           setprofile(res.data);
-          successlogin();
+          setPendingProfile(res.data);
+
+          // Fetch user location
+          try {
+            const geoRes = await fetch('https://ipapi.co/json/');
+            const geoData = await geoRes.json();
+            const userState = (geoData.region || '').toLowerCase();
+
+            if (southernStates.includes(userState)) {
+              // Southern: Email OTP
+              setOtpEmail(res.data.email);
+              await sendLoginOtp(res.data.email);
+              setShowOtpModal(true);
+            } else {
+              // Non-southern: always show mobile OTP modal (prompt for mobile)
+              setShowMobileOtpModal(true);
+            }
+          } catch (err) {
+            // Fallback: default to email OTP
+            setOtpEmail(res.data.email);
+            await sendLoginOtp(res.data.email);
+            setShowOtpModal(true);
+          }
         })
         .catch((err) => console.error(err));
     }
   }, [user]);
+
+  const handleOtpSuccess = async (verifiedUser) => {
+    setShowOtpModal(false);
+    setPendingProfile(null);
+    setOtpEmail('');
+    // Detect location and set theme
+    try {
+      const geoRes = await fetch('https://ipapi.co/json/');
+      const geoData = await geoRes.json();
+      const userState = (geoData.region || '').toLowerCase();
+      const now = new Date();
+      const hour = now.getHours();
+      if (hour >= 10 && hour < 12 && southernStates.includes(userState)) {
+        setTheme('white');
+      } else {
+        setTheme('dark');
+      }
+      // OTP channel logic
+      if (southernStates.includes(userState)) {
+        // Already verified via email OTP
+        if (verifiedUser && verifiedUser.email) {
+          setprofile(verifiedUser);
+          dispatch(login({ email: verifiedUser.email }));
+        } else if (pendingProfile && pendingProfile.email) {
+          setprofile(pendingProfile);
+          dispatch(login({ email: pendingProfile.email }));
+        }
+      } else {
+        // Show mobile OTP modal for non-southern states
+        setShowMobileOtpModal(true);
+      }
+    } catch (err) {
+      setTheme('dark'); // fallback
+    }
+  };
+
+  const handleMobileOtpSuccess = (mobile) => {
+    setShowMobileOtpModal(false);
+    setMobileOtpSuccess(true);
+    // Complete login after SMS OTP
+    if (pendingProfile && pendingProfile.email) {
+      setprofile(pendingProfile);
+      dispatch(login({ email: pendingProfile.email }));
+    }
+  };
 
   const logout = () => {
     dispatch(setcurrentuser(null));
@@ -178,6 +259,21 @@ const Navbar = ({ toggledrawer, seteditcreatechanelbtn }) => {
           user={currentuser}
         />
       )}
+
+      <OtpModal
+        open={showOtpModal}
+        email={otpEmail}
+        onClose={() => setShowOtpModal(false)}
+        onSuccess={handleOtpSuccess}
+      />
+      <MobileOtpModal
+        open={showMobileOtpModal}
+        onClose={() => setShowMobileOtpModal(false)}
+        onSuccess={handleMobileOtpSuccess}
+        registeredMobile={null}
+        sendSmsOtpByEmail={sendSmsOtpByEmail}
+        email={profile.email}
+      />
     </>
   );
 };
