@@ -69,6 +69,7 @@ TWILIO_PHONE_NUMBER=your_twilio_phone_number
 
 # Server
 PORT=5000
+FRONTEND_URL=https://yourtubesb.netlify.app
 ```
 
 ### Frontend (.env)

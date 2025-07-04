@@ -6,7 +6,9 @@ export const createGroup = async (req, res) => {
         const group = new Group({ name, members, creator });
         await group.save();
         // Generate invite link after _id is available
-        group.inviteLink = `${req.protocol}://${req.get('host')}/group/join/${group._id}`;
+        // Use frontend URL for invite links
+        const frontendUrl = process.env.FRONTEND_URL || 'https://yourtubesb.netlify.app';
+        group.inviteLink = `${frontendUrl}/group/join/${group._id}`;
         await group.save();
         res.status(201).json(group);
     } catch (error) {
@@ -56,5 +58,55 @@ export const deleteGroup = async (req, res) => {
         res.status(200).json({ message: 'Group deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error deleting group', error: error.message });
+    }
+};
+
+export const joinGroup = async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const { userId, userName } = req.body;
+
+        if (!userId || !userName) {
+            return res.status(400).json({ message: 'User ID and name are required' });
+        }
+
+        const group = await Group.findById(groupId);
+        if (!group) {
+            return res.status(404).json({ message: 'Group not found' });
+        }
+
+        // Check if user is already a member
+        const isAlreadyMember = group.members.some(member => member.userId === userId);
+        if (isAlreadyMember) {
+            return res.status(400).json({ message: 'User is already a member of this group' });
+        }
+
+        // Add user to group
+        group.members.push({ userId, userName });
+        await group.save();
+
+        res.status(200).json({
+            message: 'Successfully joined group',
+            group: group
+        });
+    } catch (error) {
+        console.error('Error joining group:', error);
+        res.status(500).json({ message: 'Error joining group', error: error.message });
+    }
+};
+
+export const getGroupById = async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const group = await Group.findById(groupId).populate('members');
+
+        if (!group) {
+            return res.status(404).json({ message: 'Group not found' });
+        }
+
+        res.status(200).json(group);
+    } catch (error) {
+        console.error('Error fetching group:', error);
+        res.status(500).json({ message: 'Error fetching group', error: error.message });
     }
 }; 

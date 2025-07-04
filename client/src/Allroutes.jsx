@@ -11,6 +11,7 @@ import Watchlater from './Pages/Watchlater/Watchlater'
 import Yourvideo from './Pages/Yourvideo/Yourvideo'
 import CreateGroup from './Pages/GroupChat/CreateGroup'
 import GroupChat from './Pages/GroupChat/GroupChat'
+import JoinGroup from './Pages/GroupChat/JoinGroup'
 import UpgradePlan from './Pages/UpgradePlan'
 
 const Allroutes = ({seteditcreatechanelbtn,setvideouploadpage}) => {
@@ -27,7 +28,7 @@ const Allroutes = ({seteditcreatechanelbtn,setvideouploadpage}) => {
         <Route path='/channel/:cid' element={<Channel seteditcreatechanelbtn={seteditcreatechanelbtn} setvideouploadpage={setvideouploadpage}/>}/>
         <Route path='/group/create' element={<CreateGroup/>}/>
         <Route path='/group/:groupId' element={<GroupChat/>}/>
-        <Route path='/group/join/:inviteLink' element={<GroupChat/>}/>
+        <Route path='/group/join/:groupId' element={<JoinGroup/>}/>
         <Route path='/upgrade' element={<UpgradePlan />} />
     </Routes>
   )
