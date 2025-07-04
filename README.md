@@ -1,70 +1,182 @@
-# Getting Started with Create React App
+# YourTube - Video Sharing Platform
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack video sharing platform built with React, Node.js, and MongoDB. Features include video upload/streaming, user authentication, group chat, payment integration, and more.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- **Video Management**: Upload, stream, like, and save videos
+- **User Authentication**: Google OAuth with email/SMS OTP verification
+- **Group Chat**: Real-time messaging with persistent storage
+- **Payment Integration**: Razorpay payment gateway for premium plans
+- **Responsive Design**: Mobile-friendly interface
+- **Security**: JWT authentication, CORS protection, file validation
 
-### `npm start`
+## 🛠️ Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Frontend
+- React 18.3.1
+- Redux Toolkit
+- React Router DOM
+- Axios for API calls
+- React Icons
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Backend
+- Node.js with Express
+- MongoDB with Mongoose
+- JWT for authentication
+- Multer for file uploads
+- Nodemailer for email services
+- Twilio for SMS OTP
 
-### `npm test`
+### External Services
+- Google OAuth
+- Razorpay Payment Gateway
+- Twilio SMS Service
+- Netlify (Frontend Deployment)
+- Render (Backend Deployment)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 📋 Prerequisites
 
-### `npm run build`
+- Node.js (v14 or higher)
+- MongoDB database
+- Google OAuth credentials
+- Razorpay account
+- Twilio account
+- Email service (Gmail recommended)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🔧 Environment Variables
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Backend (.env)
+```env
+# Database
+DB_URI=your_mongodb_connection_string
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# JWT
+JWT_SECRET=your_jwt_secret_key
 
-### `npm run eject`
+# Razorpay
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+# Email (Gmail)
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASSWORD=your_app_password
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# Twilio
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_PHONE_NUMBER=your_twilio_phone_number
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+# Server
+PORT=5000
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Frontend (.env)
+```env
+REACT_APP_API_BASE_URL=https://your-backend-url.onrender.com
+REACT_APP_VIDEO_BASE_URL=https://your-backend-url.onrender.com
+```
 
-## Learn More
+## 🚀 Installation
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 1. Clone the repository
+```bash
+git clone <repository-url>
+cd yourtube-main
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 2. Install dependencies
 
-### Code Splitting
+**Backend:**
+```bash
+cd Server
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+**Frontend:**
+```bash
+cd client
+npm install
+```
 
-### Analyzing the Bundle Size
+### 3. Configure environment variables
+- Copy the environment variables above to respective `.env` files
+- Update with your actual credentials
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 4. Start the development servers
 
-### Making a Progressive Web App
+**Backend:**
+```bash
+cd Server
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+**Frontend:**
+```bash
+cd client
+npm start
+```
 
-### Advanced Configuration
+## 📁 Project Structure
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```
+yourtube-main/
+├── client/                 # React frontend
+│   ├── src/
+│   │   ├── action/        # Redux actions
+│   │   ├── Api/           # API configuration
+│   │   ├── Component/     # React components
+│   │   ├── Pages/         # Page components
+│   │   └── Reducers/      # Redux reducers
+│   └── public/
+├── Server/                 # Node.js backend
+│   ├── Controllers/       # Route controllers
+│   ├── Models/            # MongoDB models
+│   ├── Routes/            # API routes
+│   ├── middleware/        # Custom middleware
+│   └── uploads/           # Video storage
+└── README.md
+```
 
-### Deployment
+## 🔒 Security Features
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- JWT-based authentication
+- CORS protection with allowed origins
+- File upload validation (MP4 only, size limits)
+- Input sanitization
+- Security headers (XSS protection, content type options)
+- Rate limiting and error handling
 
-### `npm run build` fails to minify
+## 🚀 Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Frontend (Netlify)
+1. Connect your GitHub repository to Netlify
+2. Set build command: `npm run build`
+3. Set publish directory: `build`
+4. Configure environment variables in Netlify dashboard
+
+### Backend (Render)
+1. Connect your GitHub repository to Render
+2. Set build command: `npm install`
+3. Set start command: `npm start`
+4. Configure environment variables in Render dashboard
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📝 License
+
+This project is licensed under the ISC License.
+
+## 🆘 Support
+
+For support, please open an issue in the GitHub repository or contact the development team.
+
+---
+
+**Note**: Make sure to configure all environment variables before deploying to production.

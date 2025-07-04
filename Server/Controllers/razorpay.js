@@ -6,14 +6,32 @@ import { sendPaymentReceipt } from '../Helper/emailService.js';
 
 dotenv.config();
 
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+// Initialize Razorpay conditionally
+let razorpay = null;
+try {
+    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+        razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET,
+        });
+    } else {
+        console.warn('Razorpay credentials not found. Payment features will be disabled.');
+    }
+} catch (error) {
+    console.error('Error initializing Razorpay:', error);
+    console.warn('Payment features will be disabled.');
+}
 
 export const createOrder = async (req, res) => {
     try {
         const { amount, currency } = req.body;
+
+        if (!razorpay) {
+            return res.status(503).json({
+                error: 'Payment service is currently unavailable. Please try again later.'
+            });
+        }
+
         const options = {
             amount: amount * 100, // amount in paise
             currency: currency || 'INR',
@@ -32,6 +50,14 @@ export const verifyPayment = async (req, res) => {
     console.log('Payment verification request received:', req.body);
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan, userId } = req.body;
     const key_secret = process.env.RAZORPAY_KEY_SECRET;
+
+    if (!key_secret) {
+        console.error('Razorpay key secret not found');
+        return res.status(503).json({
+            success: false,
+            error: 'Payment service is currently unavailable. Please try again later.'
+        });
+    }
 
     console.log('Verifying signature for order:', razorpay_order_id);
     const generated_signature = crypto.createHmac('sha256', key_secret)

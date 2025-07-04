@@ -7,11 +7,21 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import { sendPaymentReceipt, sendLoginOtpEmail } from '../Helper/emailService.js';
 
-// Initialize Razorpay
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+// Initialize Razorpay conditionally
+let razorpay = null;
+try {
+  if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+  } else {
+    console.warn('Razorpay credentials not found. Payment features will be disabled.');
+  }
+} catch (error) {
+  console.error('Error initializing Razorpay:', error);
+  console.warn('Payment features will be disabled.');
+}
 
 export const login = async (req, res) => {
   const { email } = req.body;
@@ -76,6 +86,13 @@ export const createPaymentOrder = async (req, res) => {
 
     if (!amount || !plan || !userId) {
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    if (!razorpay) {
+      return res.status(503).json({
+        success: false,
+        message: 'Payment service is currently unavailable. Please try again later.'
+      });
     }
 
     const options = {

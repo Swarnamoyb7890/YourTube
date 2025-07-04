@@ -49,7 +49,8 @@ app.use('/uploads', (req, res, next) => {
 const allowedOrigins = [
     'http://localhost:3000',
     'https://yourtubesb.netlify.app',
-    'https://your-tube-client.netlify.app'
+    'https://your-tube-client.netlify.app',
+    'https://yourtube-client.netlify.app' // Add your actual production domain
 ];
 
 // CORS middleware for all routes except /uploads
@@ -93,7 +94,18 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Routes
 app.get('/', (req, res) => {
-    res.send("Your tube is working");
+    res.json({
+        message: "YourTube API is working",
+        status: "success",
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
+        services: {
+            database: "MongoDB",
+            payment: process.env.RAZORPAY_KEY_ID ? "Razorpay (configured)" : "Razorpay (not configured)",
+            email: process.env.EMAIL_USER ? "Email (configured)" : "Email (not configured)",
+            sms: process.env.TWILIO_ACCOUNT_SID ? "SMS (configured)" : "SMS (not configured)"
+        }
+    });
 });
 
 app.use('/user', userroutes);
