@@ -1,0 +1,15 @@
+# Handle client routing, fallback to index.html
+/*    /index.html   200
+
+# Handle specific routes explicitly
+/group/*    /index.html   200
+/group/join/*    /index.html   200
+/channel/*    /index.html   200
+/videopage/*    /index.html   200
+/search/*    /index.html   200
+/Library    /index.html   200
+/Likedvideo    /index.html   200
+/Watchhistory    /index.html   200
+/Watchlater    /index.html   200
+/Yourvideo    /index.html   200
+/upgrade    /index.html   200 

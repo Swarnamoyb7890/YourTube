@@ -13,6 +13,7 @@ import CreateGroup from './Pages/GroupChat/CreateGroup'
 import GroupChat from './Pages/GroupChat/GroupChat'
 import JoinGroup from './Pages/GroupChat/JoinGroup'
 import UpgradePlan from './Pages/UpgradePlan'
+import NotFound from './Pages/NotFound'
 
 const Allroutes = ({seteditcreatechanelbtn,setvideouploadpage}) => {
   return (
@@ -30,6 +31,8 @@ const Allroutes = ({seteditcreatechanelbtn,setvideouploadpage}) => {
         <Route path='/group/:groupId' element={<GroupChat/>}/>
         <Route path='/group/join/:groupId' element={<JoinGroup/>}/>
         <Route path='/upgrade' element={<UpgradePlan />} />
+        {/* Catch-all route for any unmatched paths */}
+        <Route path='*' element={<NotFound/>}/>
     </Routes>
   )
 }
